@@ -42,9 +42,8 @@
 	{
 		float3 BasePosition;
 		float3 Position;
-		float3 Velocity;
 		float3 Albedo;
-		float2 Index;
+		float rotationSpeed;
 	};
 
 	struct Input
@@ -89,8 +88,7 @@
 
 	void surf(Input IN, inout SurfaceOutputStandard o)
 	{
-		//o.Albedo = _Color.rgb;
-		o.Albedo = IN.color.rgb;
+		o.Albedo = IN.color.rgb * _Color.rgb;
 		o.Metallic = _Metallic;
 		o.Smoothness = _Smoothness;
 		o.Normal = float3(0, 0, IN.vface < 0 ? -1 : 1);

@@ -17,9 +17,8 @@ public class MillionPoints : MonoBehaviour {
     {
         public Vector3 BasePosition;
         public Vector3 Position;
-        public Vector3 Velocity;
         public Vector3 Albedo;
-        public Vector2 Index;
+        public float rotationSpeed;
     }
 
     #endregion // Defines
@@ -29,7 +28,11 @@ public class MillionPoints : MonoBehaviour {
 
     [SerializeField]
     int _particleCount = 1000000;
-    
+
+    [SerializeField]
+    [Range(-Mathf.PI, Mathf.PI)]
+    float _phi = Mathf.PI;
+
     [SerializeField]
     ComputeShader _ComputeShader;
     
@@ -82,7 +85,8 @@ public class MillionPoints : MonoBehaviour {
         for (int i = 0; i < _particleCount; i++)
         {
             particleDataArr[i].BasePosition = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-10.0f, 10.0f), Random.Range(-10.0f, 10.0f));
-            //cubeDataArr[i].Index = new Vector2(i, j);
+            particleDataArr[i].Albedo = new Vector3(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
+            particleDataArr[i].rotationSpeed = Random.Range(1.0f, 100.0f);
         }
         this._ParticleDataBuffer.SetData(particleDataArr);
         particleDataArr = null;
@@ -92,6 +96,9 @@ public class MillionPoints : MonoBehaviour {
         _pointMesh.vertices = new Vector3[] {
             new Vector3 (0, 0),
         };
+        _pointMesh.normals = new Vector3[] {
+            new Vector3 (0, 1, 0),
+        };
         _pointMesh.SetIndices(new int[] { 0 }, MeshTopology.Points, 0);
     }
 
@@ -99,10 +106,7 @@ public class MillionPoints : MonoBehaviour {
     {
         // ComputeShader
         int kernelId = this._ComputeShader.FindKernel("MainCS");
-        this._ComputeShader.SetFloat("_Time", Time.time / 5.0f);
-        //this._ComputeShader.SetFloat("_Phi", _Phi);
-        //this._ComputeShader.SetFloat("_Lambda", _Lambda);
-        //this._ComputeShader.SetFloat("_Amplitude", _Amplitude);
+        this._ComputeShader.SetFloat("_time", Time.time / 5.0f);
         this._ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", this._ParticleDataBuffer);
         this._ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(this._particleCount / ThreadBlockSize) + 1), 1, 1);
         
@@ -111,8 +115,6 @@ public class MillionPoints : MonoBehaviour {
         this._GPUInstancingArgs[1] = (uint)this._particleCount;
         this._GPUInstancingArgsBuffer.SetData(this._GPUInstancingArgs);
         this._material.SetBuffer("_ParticleDataBuffer", this._ParticleDataBuffer);
-        //this._material.SetVector("_CubeMeshScale", this._CubeMeshScale);
-        //このCubeMeshをPointMeshに置き換えれば、メッシュたくさんつくらなくても良いのでは？
         Graphics.DrawMeshInstancedIndirect(this._pointMesh, 0, this._material, new Bounds(this._BoundCenter, this._BoundSize), this._GPUInstancingArgsBuffer);
     }
 

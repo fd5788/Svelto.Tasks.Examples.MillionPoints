@@ -1,5 +1,7 @@
 ﻿#pragma kernel MainCS
 
+#include "Common.cginc"
+
 // スレッドグループのスレッドサイズ
 #define ThreadBlockSize 256
 
@@ -7,30 +9,37 @@ struct ParticleData
 {
 	float3 BasePosition;
 	float3 Position;
-	float3 Velocity;
 	float3 Albedo;
-	float2 Index;
+	float rotationSpeed;
 };
 
 RWStructuredBuffer<ParticleData> _CubeDataBuffer;
 
-// 経過時間
-float _Time;
-
-// 位相差
-float _Phi;
-
-// 波長
-float _Lambda;
-
-// 振幅
-float _Amplitude;
+float _time;	// _Time is already defined at UnityUI.cginc?
 
 float3 hsv2rgb(float3 c)
 {
 	float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
 	float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
 	return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+float4 quat_from_axis_angle(float3 axis, float angle)
+{
+	float4 qr;
+	float half_angle = (angle * 0.5) * 3.14159 / 180.0;
+	qr.x = axis.x * sin(half_angle);
+	qr.y = axis.y * sin(half_angle);
+	qr.z = axis.z * sin(half_angle);
+	qr.w = cos(half_angle);
+	return qr;
+}
+
+float3 rotate_position(float3 position, float3 axis, float angle)
+{
+	float4 q = quat_from_axis_angle(axis, angle);
+	float3 v = position.xyz;
+	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
 }
 
 float GetRandomNumber(float2 vec, int Seed)
@@ -44,18 +53,14 @@ void MainCS(uint3 id : SV_DispatchThreadID)
 	// get index
 	const unsigned int index = id.x;
 
-	//float3 pos = _CubeDataBuffer[index].BasePosition;
-	//float3 vel = _CubeDataBuffer[index].Velocity;
+	float3 pos = _CubeDataBuffer[index].BasePosition;
+	float speed = _CubeDataBuffer[index].rotationSpeed;
 
-	//float y = _Amplitude * (1 + sin(pos.x / _Lambda + _Phi * _Time));
-	//y += _Amplitude * (1 + sin(pos.z / _Lambda + _Phi * _Time));
+	// Construct the tangent space
+	float3 tx = normalize(pos);
+	float3 ty = normalize(cross(RandomVector(index + 1), tx));
+	//float3 tz = normalize(cross(tx, ty));
 
-	//float hue = (y + _Amplitude * 2) / (4 * _Amplitude);
-	float hue = GetRandomNumber(id.xy, id.x);
+	_CubeDataBuffer[index].Position = rotate_position(pos, ty, speed * _time);
 
-	////_CubeDataBuffer[index].Velocity = float3(0, 0, 0);
-	//_CubeDataBuffer[index].Position = pos + float3(0, y, 0);
-	_CubeDataBuffer[index].Albedo = float3(hsv2rgb(float3(hue, 1, 1)));
-
-	_CubeDataBuffer[index].Position = _CubeDataBuffer[index].BasePosition;
 }
