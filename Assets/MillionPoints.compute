@@ -62,5 +62,4 @@ void MainCS(uint3 id : SV_DispatchThreadID)
 	//float3 tz = normalize(cross(tx, ty));
 
 	_CubeDataBuffer[index].Position = rotate_position(pos, ty, speed * _time);
-
 }

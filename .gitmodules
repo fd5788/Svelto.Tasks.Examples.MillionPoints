@@ -1,0 +1,3 @@
+[submodule "Assets/Plugins/Svelto.Tasks"]
+	path = Assets/Plugins/Svelto.Tasks
+	url = https://github.com/sebas77/Svelto.Tasks.git
