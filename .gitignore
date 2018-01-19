@@ -34,3 +34,6 @@ sysinfo.txt
 *.apk
 
 # Project
+il2cpp
+mono
+.idea
