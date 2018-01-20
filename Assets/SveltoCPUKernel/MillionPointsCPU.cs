@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#define TEST1
+
+using System.Collections;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using Svelto.Tasks.Enumerators;
@@ -111,14 +113,27 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             WaitForSignalEnumerator _waitForSignal = new WaitForSignalEnumerator();
             WaitForSignalEnumerator _otherwaitForSignal = new WaitForSignalEnumerator();
 
-            //the task that runs on the mainthread
-            MainThreadStuff(_waitForSignal, _otherwaitForSignal)
+            //the task that runs on the mainthread. You may wonder why I used
+            //ThreadSafeRun instead of Run. This is due to the code being not perfect
+            //Run will execute the code until the first yield immediatly, which
+            //can cause a lock in this case. ThreadSafeRun always run 
+            //the whole code on the selected runner.
+#if TEST1            
+            MainThreadStuffOption1(_waitForSignal, _otherwaitForSignal)
                 .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
-            
+#elif TEST2            
+            MainThreadStuffOption2()
+                .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
+#elif TEST3            
+            MainThreadStuffOption3(_waitForSignal, _otherwaitForSignal)
+                .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
+#endif            
             //the task that will execute the _multiParallelTask collection also
             //run on another thread.
+#if !TEST2            
             MultithreadedStuff(_waitForSignal, _otherwaitForSignal)
                 .ThreadSafeRunOnSchedule(StandardSchedulers.multiThreadScheduler);
+#endif    
         }
 
         IEnumerator MultithreadedStuff(WaitForSignalEnumerator waitForSignalEnumerator,
@@ -158,7 +173,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         }
 
         //this is our friendly main thread!
-        IEnumerator MainThreadStuff(WaitForSignalEnumerator waitForSignalEnumerator,
+        IEnumerator MainThreadStuffOption1(WaitForSignalEnumerator waitForSignalEnumerator,
             WaitForSignalEnumerator otherWaitForSignalEnumerator)
         {
             var bounds = new Bounds(_BoundCenter, _BoundSize);
@@ -173,28 +188,91 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //you will se the frame rate going super fast, but the operations will
                 //NOT be applied every frame, but only when the other thread says that
                 //the operations are done.
-#if !WANT_TO_TRY_IT                
-                yield return otherWaitForSignalEnumerator.RunOnSchedule(syncRunner);
-#else                
-//go ahead and try it.
-                yield return otherWaitForSignalEnumerator.Run();
-#endif                
+                
                 _time = Time.time;
-
-                //set the new particles positions                 
+                
                 _particleDataBuffer.SetData(_gpuparticleDataArr);
+                
+                yield return otherWaitForSignalEnumerator.RunOnSchedule(syncRunner);
+
                 //render the particles. I use DrawMeshInstancedIndirect but
                 //there aren't any compute shaders running. This is so cool!
                 Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
                     bounds, _GPUInstancingArgsBuffer);
+                
                 //tell to the other thread that now it can perform the operations
                 //for the next frame.
                 waitForSignalEnumerator.Signal();
+
                 //continue the cycle on the next frame
                 yield return null;
             }
         }
+        
+        //this is our friendly main thread!
+        IEnumerator MainThreadStuffOption2()
+        {
+            var bounds = new Bounds(_BoundCenter, _BoundSize);
 
+            var syncRunner = new SyncRunner(true);
+
+            while (true)
+            {
+                _time = Time.time;
+                
+                yield return _multiParallelTask.ThreadSafeRunOnSchedule(syncRunner);
+                
+                _particleDataBuffer.SetData(_gpuparticleDataArr);
+                
+                //render the particles. I use DrawMeshInstancedIndirect but
+                //there aren't any compute shaders running. This is so cool!
+                Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
+                    bounds, _GPUInstancingArgsBuffer);
+                
+                //continue the cycle on the next frame
+                yield return null;
+            }
+        }
+        
+        //this is our friendly main thread!
+        IEnumerator MainThreadStuffOption3(WaitForSignalEnumerator waitForSignalEnumerator,
+            WaitForSignalEnumerator otherWaitForSignalEnumerator)
+        {
+            var bounds = new Bounds(_BoundCenter, _BoundSize);
+
+            var syncRunner = new SyncRunner(true);
+
+            while (true)
+            {
+                while (otherWaitForSignalEnumerator.RunOnSchedule(StandardSchedulers.updateScheduler).MoveNext() ==
+                       false)
+                {
+                    //render the particles. I use DrawMeshInstancedIndirect but
+                    //there aren't any compute shaders running. This is so cool!
+                    Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
+                        bounds, _GPUInstancingArgsBuffer);
+
+                    yield return null;
+                }    
+                
+                _time = Time.time;
+                        
+                _particleDataBuffer.SetData(_gpuparticleDataArr);
+                
+                //render the particles. I use DrawMeshInstancedIndirect but
+                //there aren't any compute shaders running. This is so cool!
+                Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
+                    bounds, _GPUInstancingArgsBuffer);
+                
+                //tell to the other thread that now it can perform the operations
+                //for the next frame.
+                waitForSignalEnumerator.Signal();
+
+                //continue the cycle on the next frame
+                yield return null;
+            }
+        }
+        
         internal static float _time;
         volatile bool _breakIt;
 

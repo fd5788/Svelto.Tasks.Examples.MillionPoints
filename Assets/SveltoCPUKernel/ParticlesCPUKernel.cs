@@ -129,6 +129,9 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                     ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPU._time,
                     out _gpuparticleDataArr[i].Position);
             }
+            
+            //is it actually working?
+            //Utility.Console.Log("startIndex ".FastConcat(startIndex).FastConcat(" endIndex ").FastConcat(endIndex));
 
             return false;
         }
