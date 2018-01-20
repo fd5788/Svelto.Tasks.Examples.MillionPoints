@@ -39,3 +39,7 @@ mono
 .idea
 /Assets/Plugins/Editor/JetBrains.meta
 /Assets/Plugins/Editor/JetBrains
+UWP
+/Assets/WSATestCertificate.pfx
+/Assets/WSATestCertificate.pfx.meta
+/UnityPackageManager/manifest.json
