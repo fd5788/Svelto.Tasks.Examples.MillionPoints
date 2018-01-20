@@ -37,3 +37,5 @@ sysinfo.txt
 il2cpp
 mono
 .idea
+/Assets/Plugins/Editor/JetBrains.meta
+/Assets/Plugins/Editor/JetBrains

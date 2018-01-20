@@ -40,10 +40,8 @@
 
 	struct ParticleData
 	{
-//		float3 BasePosition;
 		float3 Position;
 		float3 Albedo;
-//		float rotationSpeed;
 	};
 
 	struct Input

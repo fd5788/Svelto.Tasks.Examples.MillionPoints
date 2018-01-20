@@ -13,7 +13,7 @@ public class MillionPoints : MonoBehaviour
     [SerializeField]
     ComputeShader _ComputeShader;
     
-    ComputeBuffer _ParticleDataBuffer;
+    ComputeBuffer _particleDataBuffer;
     
     /// GPU Instancingの為の引数
     readonly uint[] _GPUInstancingArgs = { 0, 0, 0, 0, 0 };
@@ -25,10 +25,6 @@ public class MillionPoints : MonoBehaviour
 
     [SerializeField]
     int _particleCount = 256000;
-    
-    [SerializeField]
-    [Range(-Mathf.PI, Mathf.PI)]
-    float _phi = Mathf.PI;
     
     [SerializeField]
     Material _material;
@@ -60,14 +56,13 @@ public class MillionPoints : MonoBehaviour
     
     void Start()
     {
-        _ParticleDataBuffer = new ComputeBuffer(_particleCount, Marshal.SizeOf(typeof(GPUParticleData)));
-        _GPUInstancingArgsBuffer = new ComputeBuffer(1, 
-            _GPUInstancingArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         
 #if !COMPUTE_SHADERS        
         _cpuParticleDataArr = new CPUParticleData[_particleCount];
 #endif        
         _gpuparticleDataArr = new GPUParticleData[_particleCount];
+        
+        _particleDataBuffer = new ComputeBuffer(_particleCount, Marshal.SizeOf(typeof(GPUParticleData)));
         
 #if !COMPUTE_SHADERS        
         // set default position
@@ -93,7 +88,7 @@ public class MillionPoints : MonoBehaviour
                                                         Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
         }
         
-        _ParticleDataBuffer.SetData(_gpuparticleDataArr);
+        _particleDataBuffer.SetData(_gpuparticleDataArr);
         _gpuparticleDataArr = null;
 #endif        
         
@@ -107,19 +102,22 @@ public class MillionPoints : MonoBehaviour
         };
         _pointMesh.SetIndices(new int[] { 0 }, MeshTopology.Points, 0);
         
+        _GPUInstancingArgsBuffer = new ComputeBuffer(1, 
+            _GPUInstancingArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         _GPUInstancingArgs[0] = (_pointMesh != null) ? _pointMesh.GetIndexCount(0) : 0;
         _GPUInstancingArgs[1] = (uint)_particleCount;
         _GPUInstancingArgsBuffer.SetData(_GPUInstancingArgs);
         
-        _material.SetBuffer("_ParticleDataBuffer", _ParticleDataBuffer);
-        
 #if COMPUTE_SHADERS
         var materialShader = Shader.Find("Custom/MillionPoints");
         _material.shader = materialShader;
+        _material.SetBuffer("_ParticleDataBuffer", _particleDataBuffer);
     
         StartComputerShaderWork();
 #else
-        _material.shader = Shader.Find("Custom/MillionPointsCPU");
+        var materialShader = Shader.Find("Custom/MillionPointsCPU");
+        _material.shader = materialShader;
+        _material.SetBuffer("_ParticleDataBuffer", _particleDataBuffer);
         
         StartSveltoCPUWork();
 #endif        
@@ -173,7 +171,7 @@ public class MillionPoints : MonoBehaviour
             
             _time = Time.time;
             
-            _ParticleDataBuffer.SetData(_gpuparticleDataArr);
+            _particleDataBuffer.SetData(_gpuparticleDataArr);
             
             Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
                 bounds, _GPUInstancingArgsBuffer);
@@ -195,21 +193,18 @@ public class MillionPoints : MonoBehaviour
 
     IEnumerator ComputerShaderRun()
     {
+        int kernelId = _ComputeShader.FindKernel("MainCS");
+        _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _particleDataBuffer);
+ 
         while (true)
         {
             // ComputeShader
-            int kernelId = this._ComputeShader.FindKernel("MainCS");
-            this._ComputeShader.SetFloat("_Time", Time.time / 5.0f);
-            this._ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", this._ParticleDataBuffer);
-            this._ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(this._particleCount / ThreadBlockSize) + 1), 1, 1);
+            _ComputeShader.SetFloat("_time", Time.time);
+            _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_particleCount / (float)ThreadBlockSize) + 1), 1, 1);
         
             // GPU Instaicing
-            this._GPUInstancingArgs[0] = (this._pointMesh != null) ? this._pointMesh.GetIndexCount(0) : 0;
-            this._GPUInstancingArgs[1] = (uint)this._particleCount;
-            this._GPUInstancingArgsBuffer.SetData(this._GPUInstancingArgs);
-            this._material.SetBuffer("_ParticleDataBuffer", this._ParticleDataBuffer);
-            Graphics.DrawMeshInstancedIndirect(this._pointMesh, 0, this._material,
-                                               new Bounds(this._BoundCenter, this._BoundSize), this._GPUInstancingArgsBuffer);
+            Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
+                                               new Bounds(_BoundCenter, _BoundSize), _GPUInstancingArgsBuffer);
 
             yield return null;
         }
@@ -217,10 +212,10 @@ public class MillionPoints : MonoBehaviour
 #endif
     void OnDisable()
     {
-        if (_ParticleDataBuffer != null)
+        if (_particleDataBuffer != null)
         {
-            _ParticleDataBuffer.Release();
-            _ParticleDataBuffer = null;
+            _particleDataBuffer.Release();
+            _particleDataBuffer = null;
         }
         if (_GPUInstancingArgsBuffer != null)
         {

@@ -26,7 +26,7 @@
 #define ENABLE_INSTANCING
 #endif
 
-		struct appdata
+	struct appdata
 	{
 		float4 vertex : POSITION;
 		float3 normal : NORMAL;

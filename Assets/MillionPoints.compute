@@ -1,6 +1,41 @@
 ﻿#pragma kernel MainCS
 
-#include "Common.cginc"
+#include "UnityCG.cginc"
+
+// Hash function from H. Schechter & R. Bridson, goo.gl/RXiKaH
+uint Hash(uint s)
+{
+	s ^= 2747636419u;
+	s *= 2654435769u;
+	s ^= s >> 16;
+	s *= 2654435769u;
+	s ^= s >> 16;
+	s *= 2654435769u;
+	return s;
+}
+
+float Random(uint seed)
+{
+	return float(Hash(seed)) / 4294967295.0; // 2^32-1
+}
+
+// Uniformaly distributed points on a unit sphere
+// http://mathworld.wolfram.com/SpherePointPicking.html
+float3 RandomUnitVector(uint seed)
+{
+	float PI2 = 6.28318530718;
+	float z = 1 - 2 * Random(seed);
+	float xy = sqrt(1.0 - z * z);
+	float sn, cs;
+	sincos(PI2 * Random(seed + 1), sn, cs);
+	return float3(sn * xy, cs * xy, z);
+}
+
+// Uniformaly distributed points inside a unit sphere
+float3 RandomVector(uint seed)
+{
+	return RandomUnitVector(seed) * sqrt(Random(seed + 2));
+}
 
 #define ThreadBlockSize 256
 
@@ -15,13 +50,6 @@ struct ParticleData
 RWStructuredBuffer<ParticleData> _CubeDataBuffer;
 
 float _time;	// _Time is already defined at UnityUI.cginc?
-
-float3 hsv2rgb(float3 c)
-{
-	float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-	float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
-	return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
 
 float4 quat_from_axis_angle(float3 axis, float angle)
 {
@@ -41,11 +69,6 @@ float3 rotate_position(float3 position, float3 axis, float angle)
 	return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
 }
 
-float GetRandomNumber(float2 vec, int Seed)
-{
-	return frac(sin(dot(vec.xy, float2(12.9898, 78.233)) + Seed) * 43758.5453);
-}
-
 [numthreads(ThreadBlockSize, 1, 1)]
 void MainCS(uint3 id : SV_DispatchThreadID)
 {
@@ -58,7 +81,6 @@ void MainCS(uint3 id : SV_DispatchThreadID)
 	// Construct the tangent space
 	float3 tx = normalize(pos);
 	float3 ty = normalize(cross(RandomVector(index + 1), tx));
-	//float3 tz = normalize(cross(tx, ty));
 
 	_CubeDataBuffer[index].Position = rotate_position(pos, ty, speed * _time);
 }
