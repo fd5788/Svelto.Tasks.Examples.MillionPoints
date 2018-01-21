@@ -1,3 +1,3 @@
 # Svelto.Tasks.MillionPoints
 
-This is a working in progress, you can start to experiment with it, but it still needs love.
+Another show off of svelto.tasks multithreading capabilities. Relative article here: http://www.sebaslab.com/learning-svelto-tasks-example-million-points-example/
