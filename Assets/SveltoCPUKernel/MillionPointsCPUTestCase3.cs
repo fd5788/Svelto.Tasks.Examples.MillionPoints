@@ -22,7 +22,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //exploit continuation here. Note that we are using the SyncRunner here
                 //this will actually stall the mainthread and its execution until
                 //the multiParallelTask is done
-                yield return _multiParallelTask.ThreadSafeRunOnSchedule(syncRunner);
+                yield return _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
                 //then it resumes here, copying the result to the particleDataBuffer.
                 //remember, multiParalleTasks is not executing anymore until the next frame!
                 //so the array is safe to use
@@ -34,7 +34,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //the application is shutting down. This is not that necessary in a 
             //standalone client, but necessary to stop the thread when the 
             //application is stopped in the Editor to stop all the threads.
-            _multiParallelTask.ClearAndKill();
+            _multiParallelTasks.ClearAndKill();
 
             TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
         }

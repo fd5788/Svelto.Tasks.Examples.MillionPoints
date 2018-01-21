@@ -37,7 +37,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 
         public CPUParticleData[] _cpuParticleDataArr;
         public GPUParticleData[] _gpuparticleDataArr;
-        MultiThreadedParallelTaskCollection _multiParallelTask;
+        MultiThreadedParallelTaskCollection _multiParallelTasks;
 
         const uint NUM_OF_SVELTO_THREADS = 16;
 
@@ -126,13 +126,13 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             var particlesPerThread = _particleCount / NUM_OF_SVELTO_THREADS;
             //create a collection of task that will run in parallel on several threads.
             //the number of threads and tasks to perform are not dipendennt.
-            _multiParallelTask = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS, false);
+            _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS, false);
             //in this case though we just want to perform a task for each thread
             //ParticlesCPUKernel is a task (IEnumerator) that executes the 
             //algebra operation on the particles. Each task perform the operation
             //on particlesPerThread particles
             for (int i = 0; i < NUM_OF_SVELTO_THREADS; i++)
-                _multiParallelTask.Add(new ParticlesCPUKernel((int) (particlesPerThread * i), (int) particlesPerThread, this));
+                _multiParallelTasks.Add(new ParticlesCPUKernel((int) (particlesPerThread * i), (int) particlesPerThread, this));
         }
 
         internal static float _time;

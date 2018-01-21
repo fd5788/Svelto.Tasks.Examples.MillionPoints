@@ -63,7 +63,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //is done. That's why the syncrunner can sleep between yields, so 
                 //that this thread won't take much CPU just to wait the parallel 
                 //tasks to finish
-                yield return _multiParallelTask.ThreadSafeRunOnSchedule(syncRunner);
+                yield return _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
                 
                 //the 1 Million particles operation are done, let's signal that the
                 //result can now be used
@@ -80,7 +80,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //the application is shutting down. This is not that necessary in a 
             //standalone client, but necessary to stop the thread when the 
             //application is stopped in the Editor to stop all the threads.
-            _multiParallelTask.ClearAndKill();
+            _multiParallelTasks.ClearAndKill();
 
             TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
         }
