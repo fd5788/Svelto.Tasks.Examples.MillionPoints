@@ -135,7 +135,8 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                     out _gpuparticleDataArr[i].Position);
             }
 
-            Interlocked.Add(ref _pc.particlesTransformed, i - startIndex);
+            var value = i - startIndex;
+            Interlocked.Add(ref _pc.particlesTransformed, value);
 
             return false;
         }

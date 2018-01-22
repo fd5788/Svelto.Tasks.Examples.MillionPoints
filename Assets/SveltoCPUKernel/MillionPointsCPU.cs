@@ -1,7 +1,4 @@
-﻿#define TEST1
-#define BENCHMARK
-
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using UnityEngine;
 using Random = UnityEngine.Random;
 

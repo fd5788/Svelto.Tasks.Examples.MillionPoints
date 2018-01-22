@@ -15,11 +15,11 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             var syncRunner = new SyncRunner();
 
             //these will help with synchronization between threads
-            WaitForSignalEnumerator _waitForSignal = new WaitForSignalEnumerator();
+            WaitForSignalEnumerator _waitForSignal = new WaitForSignalEnumerator(() => _breakIt);
             WaitForSignalEnumerator _otherwaitForSignal = new WaitForSignalEnumerator();
 
             //Start the operations on other threads
-            OperationsRunningOnOtherThreads(_waitForSignal, _otherwaitForSignal)
+            OperationsRunningOnOtherThreads(_waitForSignal, _otherwaitForSignal, particleCounter)
                 .ThreadSafeRunOnSchedule(StandardSchedulers.multiThreadScheduler);
 
             //start the mainloop
@@ -31,19 +31,19 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //Note that I am stalling the main thread here! This is entirely up to you
                 //if you don't want to stall it, as you can see with the other use cases
                 yield return _otherwaitForSignal.RunOnSchedule(syncRunner);
-
+#if BENCHMARK
                 if (PerformanceCheker.PerformanceProfiler.showingFPSValue > 30.0f)
                 {
+                    
                     if (particleCounter.particlesLimit >= 16)
                         particleCounter.particlesLimit -= 16;
-                    ThreadUtility.MemoryBarrier();
-                    if (PerformanceCheker.PerformanceProfiler.particlesCount > particleCounter.particlesTransformed)
-                        throw new Exception();
-                    PerformanceCheker.PerformanceProfiler.particlesCount = particleCounter.particlesTransformed;
-                    particleCounter.particlesTransformed = 0;
-                    ThreadUtility.MemoryBarrier();
-                }
 
+                    PerformanceCheker.PerformanceProfiler.particlesCount = particleCounter.particlesTransformed;
+                }
+                
+                particleCounter.particlesTransformed = 0;
+#endif    
+                
                 _particleDataBuffer.SetData(_gpuparticleDataArr);
 
                 //render the particles. I use DrawMeshInstancedIndirect but
@@ -61,7 +61,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         }
         
         IEnumerator OperationsRunningOnOtherThreads(WaitForSignalEnumerator waitForSignalEnumerator,
-            WaitForSignalEnumerator otherWaitForSignalEnumerator)
+            WaitForSignalEnumerator otherWaitForSignalEnumerator, ParticleCounter particleCounter)
         {
             //a SyncRunner stop the execution of the thread until the task is not completed
             //the parameter true means that the runner will sleep in between yields
@@ -86,7 +86,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //condition, which is needed only because if this application runs
                 //in the editor, the threads spawned will not stop until the Editor is 
                 //shut down.
-                while (_breakIt == false && waitForSignalEnumerator.MoveNext() == true) ThreadUtility.Yield();
+                yield return waitForSignalEnumerator.RunOnSchedule(syncRunner);
             }
 
             //the application is shutting down. This is not that necessary in a 

@@ -43,7 +43,6 @@ namespace PerformanceCheker
 
         //FPS check
         readonly float FPSCheckIntervalSecond = 0.3f;
-        readonly float  waitForStabilization = 3.0f;
         int frameCount = 0;
         float prevTime=0f;
         float deltaTime=0f;

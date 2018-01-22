@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using Svelto.Utilities;
 using UnityEngine;
 
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
@@ -23,12 +22,14 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //this will actually stall the mainthread and its execution until
                 //the multiParallelTask is done
                 yield return _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
-                //then it resumes here, copying the result to the particleDataBuffer.
-                //remember, multiParalleTasks is not executing anymore until the next frame!
-                //so the array is safe to use
+                //then it resumes here, however the just computed particles 
+                //cannot copied here, as the Unity methods are not thread safe
+                //so I have to run a simple enumerator on the main thread
                 var continuator = CopyBufferOnUpdateRunner.ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
+                //and I will wait it to complete, still exploting the continuation wrapper.
 
-                while (_breakIt == false && continuator.MoveNext() == true) ThreadUtility.Yield();
+                continuator.BreakOnCondition(() => _breakIt);
+                yield return continuator.RunOnSchedule(syncRunner);
             }
 
             //the application is shutting down. This is not that necessary in a 
