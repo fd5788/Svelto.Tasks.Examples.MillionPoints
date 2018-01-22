@@ -54,7 +54,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             RandomUnitVector(seed, out result);
             var sqrt = (float) Math.Sqrt(Randomf(seed + 2));
             result.x = result.x * sqrt;
-            result.y = result.z * sqrt;
+            result.y = result.y * sqrt;
             result.z = result.z * sqrt;
         }
 

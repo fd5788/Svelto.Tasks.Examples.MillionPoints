@@ -1,13 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-/// <summary>
-/// GC回数
-/// MonoHeapのサイズ
-/// Monoの使用メモリサイズ
-/// FPSなどを表示する
-/// </summary>
 namespace PerformanceCheker
 {
 
@@ -21,30 +13,6 @@ namespace PerformanceCheker
             }
         }
 
-        public long UsedHeapSize
-        {
-            get
-            {
-                return used_heap_size_;
-            }
-        }
-
-        public long MonoHeapSize
-        {
-            get
-            {
-                return mono_heap_size_;
-            }
-        }
-
-        public long MonoUsedSize
-        {
-            get
-            {
-                return mono_used_size_;
-            }
-        }
-
         public int CurrentFPS
         {
             get
@@ -52,20 +20,37 @@ namespace PerformanceCheker
                 return (int)showingFPSValue;
             }
         }
+        
+        public int MaxFPS
+        {
+            get
+            {
+                return (int)showingMaxFPSValue;
+            }
+        }
+        
+        public int MinFPS
+        {
+            get
+            {
+                return (int)showingMinFPSValue;
+            }
+        }
 
-        private int gc_start_count_=0;
-        private long used_heap_size_=0;
-        private long mono_heap_size_=0;
-        private long mono_used_size_=0;
-        private int gc_count=0;
+        int gc_start_count_=0;
+        int gc_count=0;
 
 
         //FPS check
-        readonly float FPSCheckIntervalSecond = 0.2f;
-        private int frameCount = 0;
-        private float prevTime=0f;
-        private float deltaTime=0f;
-        private float showingFPSValue=0f;
+        readonly float FPSCheckIntervalSecond = 0.3f;
+        readonly float  waitForStabilization = 3.0f;
+        int frameCount = 0;
+        float prevTime=0f;
+        float deltaTime=0f;
+        float showingFPSValue=0f;
+        float showingMaxFPSValue=0f;
+        float showingMinFPSValue=float.MaxValue;
+        int iterations;
        
         void Awake()
         {
@@ -81,15 +66,17 @@ namespace PerformanceCheker
             {
                 showingFPSValue = frameCount / deltaTime;
 
+                if (iterations++ > 6)
+                {
+                    if (showingMinFPSValue > showingFPSValue) showingMinFPSValue = showingFPSValue;
+                    if (showingMaxFPSValue < showingFPSValue) showingMaxFPSValue = showingFPSValue;
+                }
+
                 frameCount = 0;
                 prevTime = Time.realtimeSinceStartup;
             }
 
-
             gc_count = System.GC.CollectionCount(0 /* generation */) - gc_start_count_;
-            used_heap_size_ = UnityEngine.Profiling.Profiler.usedHeapSizeLong;
-            mono_heap_size_ = UnityEngine.Profiling.Profiler.GetMonoHeapSizeLong();
-            mono_used_size_ = UnityEngine.Profiling.Profiler.GetMonoUsedSizeLong();
         }
     }
 }
