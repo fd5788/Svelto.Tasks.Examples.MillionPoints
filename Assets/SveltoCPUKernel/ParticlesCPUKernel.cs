@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Threading;
 using UnityEngine;
 
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
@@ -11,6 +12,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 
         CPUParticleData[] _particleDataArr;
         GPUParticleData[] _gpuparticleDataArr;
+        MillionPointsCPU.ParticleCounter _pc;
 
         static uint Hash(uint s)
         {
@@ -104,17 +106,20 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             result.z = position.z + 2.0f * otherResult.z;
         }
 
-        public ParticlesCPUKernel(int startIndex, int numberOfParticles, MillionPointsCPU t)
+        public ParticlesCPUKernel(int startIndex, int numberOfParticles, MillionPointsCPU t,
+                                  MillionPointsCPU.ParticleCounter pc)
         {
             this.startIndex = startIndex;
             endIndex = startIndex + numberOfParticles;
             _particleDataArr = t._cpuParticleDataArr;
             _gpuparticleDataArr = t._gpuparticleDataArr;
+            _pc = pc;
         }
 
         public bool MoveNext()
         {
-            for (int i = startIndex; i < endIndex; i++)
+            int i;
+            for (i = startIndex; i < endIndex - _pc.particlesLimit; i++)
             {
                 Vector3 randomVector;
                 RandomVector((uint) i + 1, out randomVector);
@@ -129,9 +134,8 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                     ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPU._time,
                     out _gpuparticleDataArr[i].Position);
             }
-            
-            //is it actually working?
-            //Utility.Console.Log("startIndex ".FastConcat(startIndex).FastConcat(" endIndex ").FastConcat(endIndex));
+
+            Interlocked.Add(ref _pc.particlesTransformed, i - startIndex);
 
             return false;
         }

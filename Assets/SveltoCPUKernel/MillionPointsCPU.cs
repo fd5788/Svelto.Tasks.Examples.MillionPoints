@@ -1,10 +1,8 @@
 ﻿#define TEST1
+#define BENCHMARK
 
-using System.Collections;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using Svelto.Tasks.Enumerators;
 using Random = UnityEngine.Random;
 
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
@@ -25,7 +23,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 
         #endregion // Defines
 
-        [SerializeField] int _particleCount = 256000;
+        [SerializeField] uint _particleCount = 256000;
 
         [SerializeField] Material _material;
 
@@ -55,7 +53,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             _cpuParticleDataArr = new CPUParticleData[_particleCount];
             _gpuparticleDataArr = new GPUParticleData[_particleCount];
 
-            _particleDataBuffer = new ComputeBuffer(_particleCount, Marshal.SizeOf(typeof(GPUParticleData)));
+            _particleDataBuffer = new ComputeBuffer((int) _particleCount, Marshal.SizeOf(typeof(GPUParticleData)));
 
             // set default position
             for (int i = 0; i < _particleCount; i++)
@@ -107,7 +105,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //can cause a lock in this case. ThreadSafeRun always run 
             //the whole code on the selected runner.
 #if TEST1            
-            MainThreadOperations()
+            MainThreadOperations(pc)
                 .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
 #elif TEST2            
             MainThreadLoopWithNaiveSynchronization()
@@ -120,10 +118,21 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //run on another thread.
         }
 
+        internal class ParticleCounter
+        {
+            public int particlesTransformed;
+            public uint particlesLimit;
+
+            public ParticleCounter(uint limit)
+            {
+                particlesLimit = limit;
+            }
+        }
+
         void PrepareParallelTasks()
         {
             //calculate the number of particles per thread
-            var particlesPerThread = _particleCount / NUM_OF_SVELTO_THREADS;
+            uint particlesPerThread = _particleCount / NUM_OF_SVELTO_THREADS;
             //create a collection of task that will run in parallel on several threads.
             //the number of threads and tasks to perform are not dipendennt.
             _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS, false);
@@ -131,12 +140,19 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //ParticlesCPUKernel is a task (IEnumerator) that executes the 
             //algebra operation on the particles. Each task perform the operation
             //on particlesPerThread particles
+#if BENCHMARK            
+            pc = new ParticleCounter(particlesPerThread - 16);
+#else
+            pc = new ParticleCounter(0);
+#endif
+            
             for (int i = 0; i < NUM_OF_SVELTO_THREADS; i++)
-                _multiParallelTasks.Add(new ParticlesCPUKernel((int) (particlesPerThread * i), (int) particlesPerThread, this));
+                _multiParallelTasks.Add(new ParticlesCPUKernel((int) (particlesPerThread * i), (int) particlesPerThread, this, pc));
         }
 
         internal static float _time;
         volatile bool _breakIt;
+        ParticleCounter pc;
 
         void OnDisable()
         {

@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using System.Threading;
+﻿using System;
+using System.Collections;
 using Svelto.Tasks.Enumerators;
 using Svelto.Utilities;
 using UnityEngine;
@@ -8,7 +8,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 {
     public partial class MillionPointsCPU
     {
-        IEnumerator MainThreadOperations()
+        IEnumerator MainThreadOperations(ParticleCounter particleCounter)
         {
             var bounds = new Bounds(_BoundCenter, _BoundSize);
 
@@ -31,7 +31,19 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //Note that I am stalling the main thread here! This is entirely up to you
                 //if you don't want to stall it, as you can see with the other use cases
                 yield return _otherwaitForSignal.RunOnSchedule(syncRunner);
-                
+
+                if (PerformanceCheker.PerformanceProfiler.showingFPSValue > 30.0f)
+                {
+                    if (particleCounter.particlesLimit >= 16)
+                        particleCounter.particlesLimit -= 16;
+                    ThreadUtility.MemoryBarrier();
+                    if (PerformanceCheker.PerformanceProfiler.particlesCount > particleCounter.particlesTransformed)
+                        throw new Exception();
+                    PerformanceCheker.PerformanceProfiler.particlesCount = particleCounter.particlesTransformed;
+                    particleCounter.particlesTransformed = 0;
+                    ThreadUtility.MemoryBarrier();
+                }
+
                 _particleDataBuffer.SetData(_gpuparticleDataArr);
 
                 //render the particles. I use DrawMeshInstancedIndirect but
