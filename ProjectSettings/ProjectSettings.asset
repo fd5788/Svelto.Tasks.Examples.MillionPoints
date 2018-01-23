@@ -531,6 +531,7 @@ PlayerSettings:
   webGLLinkerTarget: 0
   scriptingDefineSymbols:
     1: TEST1;BENCHMARK
+    14: TEST1;BENCHMARK
   platformArchitecture: {}
   scriptingBackend:
     Metro: 2
