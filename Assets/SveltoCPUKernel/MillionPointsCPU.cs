@@ -34,7 +34,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         public GPUParticleData[] _gpuparticleDataArr;
         MultiThreadedParallelTaskCollection _multiParallelTasks;
 
-        const uint NUM_OF_SVELTO_THREADS = 16;
+        const uint NUM_OF_SVELTO_THREADS = 28;
 
         void Awake()
         {

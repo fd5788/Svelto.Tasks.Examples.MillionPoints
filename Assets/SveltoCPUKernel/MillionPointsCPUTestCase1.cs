@@ -74,7 +74,9 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //that this thread won't take much CPU just to wait the parallel 
                 //tasks to finish
                 _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
-#if BENCHMARK //do it again
+#if BENCHMARK //do it x4
+                _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
+                _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
                 _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
 #endif                
                 //the 1 Million particles operation are done, let's signal that the
