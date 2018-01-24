@@ -38,6 +38,11 @@ namespace PerformanceCheker
             bufferedString.Append("\r\n");
             bufferedString.Append("Min FPS:");
             bufferedString.Append(profiler.MinFPS);
+#if BENCHMARK                        
+            bufferedString.Append("\r\n");
+            bufferedString.Append("Particles Transformed:");
+            bufferedString.Append(PerformanceProfiler.particlesCount);
+#endif    
             bufferedString.Append("\r\n");
             bufferedString.Append("GC Alloc Num:");
             bufferedString.Append(profiler.GCcount);

@@ -43,15 +43,15 @@ namespace PerformanceCheker
 
         //FPS check
         readonly float FPSCheckIntervalSecond = 0.3f;
-        readonly float  waitForStabilization = 3.0f;
         int frameCount = 0;
         float prevTime=0f;
         float deltaTime=0f;
-        float showingFPSValue=0f;
+        public static float showingFPSValue=0f;
         float showingMaxFPSValue=0f;
         float showingMinFPSValue=float.MaxValue;
         int iterations;
-       
+        public static int particlesCount;
+
         void Awake()
         {
             gc_start_count_ = System.GC.CollectionCount(0 /* generation */);
