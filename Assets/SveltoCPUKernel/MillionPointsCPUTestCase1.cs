@@ -73,7 +73,10 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //is done. That's why the syncrunner can sleep between yields, so 
                 //that this thread won't take much CPU just to wait the parallel 
                 //tasks to finish
-                _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);                
+                _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
+#if BENCHMARK //do it again
+                _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
+#endif                
                 //the 1 Million particles operation are done, let's signal that the
                 //result can now be used
                 otherWaitForSignal.Signal();
