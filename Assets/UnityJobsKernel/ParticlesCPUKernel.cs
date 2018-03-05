@@ -1,23 +1,14 @@
 ﻿using System;
-using System.Collections;
-using System.Threading;
 using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
-namespace Svelto.Tasks.Example.MillionPoints.Multithreading
+namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
 {
-    class ParticlesCPUKernel : IEnumerator
+    struct ParticlesCPUKernel : IJobParallelFor
     {
-        int startIndex;
-        int endIndex;
-
-        CPUParticleData[] _particleDataArr;
-#if !UNITY_2018_1_OR_NEWER        
-        NativeArray<GPUParticleData> _gpuparticleDataArr;
-#else
-        GPUParticleData[] _gpuparticleDataArr;
-#endif        
-        MillionPointsCPU.ParticleCounter _pc;
+        public NativeArray<CPUParticleData> _particleDataArr;
+        public NativeArray<GPUParticleData> _gpuparticleDataArr;
 
         static uint Hash(uint s)
         {
@@ -111,47 +102,33 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             result.z = position.z + 2.0f * otherResult.z;
         }
 
-        public ParticlesCPUKernel(int startIndex, int numberOfParticles, MillionPointsCPU t,
-                                  MillionPointsCPU.ParticleCounter pc)
+        public ParticlesCPUKernel(MillionPointsCPUUnityJobs t)
         {
-            this.startIndex = startIndex;
-            endIndex = startIndex + numberOfParticles;
             _particleDataArr = t._cpuParticleDataArr;
             _gpuparticleDataArr = t._gpuparticleDataArr;
-            _pc = pc;
         }
 
-        public bool MoveNext()
+        public void Execute(int i)
         {
-            int i;
-            for (i = startIndex; i < endIndex - _pc.particlesLimit; i++)
-            {
-                Vector3 randomVector;
-                RandomVector((uint) i + 1, out randomVector);
-                Cross(ref randomVector, ref _particleDataArr[i].basePosition, out randomVector);
+            var particle = _particleDataArr[i];
+            var gpuData = _gpuparticleDataArr[i];
+            
+            Vector3 randomVector;
+            RandomVector((uint) i + 1, out randomVector);
+            Cross(ref randomVector, ref particle.BasePosition, out randomVector);
 
-                var magnitude = 1.0f / randomVector.magnitude;
-                randomVector.x *= magnitude;
-                randomVector.y *= magnitude;
-                randomVector.z *= magnitude;
+            var magnitude = 1.0f / randomVector.magnitude;
+            randomVector.x *= magnitude;
+            randomVector.y *= magnitude;
+            randomVector.z *= magnitude;
+            
+            
+            rotate_position(ref particle.BasePosition,
+                            ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPUUnityJobs._time,
+                            out gpuData.Position);
 
-                Vector3 position;
-                rotate_position(ref _particleDataArr[i].basePosition,
-                    ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPU._time,
-                    out position);
-                
-                _gpuparticleDataArr[i] = new GPUParticleData(position, _gpuparticleDataArr[i].albedo);
-            }
-
-            var value = i - startIndex;
-            Interlocked.Add(ref _pc.particlesTransformed, value);
-
-            return false;
+            _particleDataArr[i] = particle;
+            _gpuparticleDataArr[i] = gpuData;
         }
-
-        public void Reset()
-        {}
-
-        public object Current { get; private set; }
     }
 }

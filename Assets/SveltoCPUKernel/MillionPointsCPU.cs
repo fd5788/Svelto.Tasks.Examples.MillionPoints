@@ -1,6 +1,17 @@
-﻿using System.Runtime.InteropServices;
+﻿
+using System;
+using System.Collections;
+using System.Runtime.CompilerServices;
+#if UNITY_2018_1_OR_NEWER
+using Unity.Collections;
+#endif
+using System.Runtime.InteropServices;
 using UnityEngine;
 using Random = UnityEngine.Random;
+
+#if !TEST1 && !TEST2 && !TEST3
+#warning either TEST1 OR TEST2 OR TEST3 preprocessor must be active to execute the test
+#endif
 
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 {
@@ -8,30 +19,28 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
     {
         // ==============================
 
-        #region Computer_shader_stuff_I_still_have_to_understand_properly
+#region Computer_shader_stuff_I_still_have_to_understand_properly
 
         ComputeBuffer _particleDataBuffer;
-
-        /// GPU Instancingの為の引数
-        readonly uint[] _GPUInstancingArgs = {0, 0, 0, 0, 0};
-
-        /// GPU Instancingの為の引数バッファ
         ComputeBuffer _GPUInstancingArgsBuffer;
 
-        #endregion // Defines
+        readonly uint[] _GPUInstancingArgs = {0, 0, 0, 0, 0};
 
-        [SerializeField] uint _particleCount = 256000;
+#endregion 
 
+        [SerializeField] uint _particleCount;
         [SerializeField] Material _material;
-
         [SerializeField] Vector3 _BoundCenter = Vector3.zero;
-
         [SerializeField] Vector3 _BoundSize = new Vector3(300f, 300f, 300f);
 
         Mesh _pointMesh;
 
         public CPUParticleData[] _cpuParticleDataArr;
+#if !UNITY_2018_1_OR_NEWER
+        public NativeArray<GPUParticleData> _gpuparticleDataArr;
+#else        
         public GPUParticleData[] _gpuparticleDataArr;
+#endif    
         MultiThreadedParallelTaskCollection _multiParallelTasks;
 
         const uint NUM_OF_SVELTO_THREADS = 16;
@@ -47,46 +56,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 
         void Start()
         {
-            _cpuParticleDataArr = new CPUParticleData[_particleCount];
-            _gpuparticleDataArr = new GPUParticleData[_particleCount];
-
-            _particleDataBuffer = new ComputeBuffer((int) _particleCount, Marshal.SizeOf(typeof(GPUParticleData)));
-
-            // set default position
-            for (int i = 0; i < _particleCount; i++)
-            {
-                _cpuParticleDataArr[i].BasePosition = new Vector3(Random.Range(-10.0f, 10.0f),
-                    Random.Range(-10.0f, 10.0f), Random.Range(-10.0f, 10.0f));
-                _cpuParticleDataArr[i].rotationSpeed = Random.Range(1.0f, 100.0f);
-            }
-
-            for (int i = 0; i < _particleCount; i++)
-            {
-                _gpuparticleDataArr[i].Albedo = new Vector3(Random.Range(0.0f, 1.0f),
-                    Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
-            }
-
-            // creat point mesh
-            _pointMesh = new Mesh();
-            _pointMesh.vertices = new Vector3[]
-            {
-                new Vector3(0, 0),
-            };
-            _pointMesh.normals = new Vector3[]
-            {
-                new Vector3(0, 1, 0),
-            };
-            _pointMesh.SetIndices(new int[] {0}, MeshTopology.Points, 0);
-
-            _GPUInstancingArgsBuffer = new ComputeBuffer(1,
-                _GPUInstancingArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
-            _GPUInstancingArgs[0] = (_pointMesh != null) ? _pointMesh.GetIndexCount(0) : 0;
-            _GPUInstancingArgs[1] = (uint) _particleCount;
-            _GPUInstancingArgsBuffer.SetData(_GPUInstancingArgs);
-
-            var materialShader = Shader.Find("Custom/MillionPointsCPU");
-            _material.shader = materialShader;
-            _material.SetBuffer("_ParticleDataBuffer", _particleDataBuffer);
+            InitializeDataForDrawMeshInstancedIndirect();
 
             StartSveltoCPUWork();
         }
@@ -102,7 +72,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //can cause a lock in this case. ThreadSafeRun always run 
             //the whole code on the selected runner.
 #if TEST1            
-            MainThreadOperations(pc)
+            MainThreadOperations()
                 .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
 #elif TEST2            
             MainThreadLoopWithNaiveSynchronization()
@@ -132,7 +102,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             uint particlesPerThread = _particleCount / NUM_OF_SVELTO_THREADS;
             //create a collection of task that will run in parallel on several threads.
             //the number of threads and tasks to perform are not dipendennt.
-            _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS, false);
+            _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS, true);
             //in this case though we just want to perform a task for each thread
             //ParticlesCPUKernel is a task (IEnumerator) that executes the 
             //algebra operation on the particles. Each task perform the operation
@@ -140,19 +110,16 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 #if BENCHMARK            
             pc = new ParticleCounter(particlesPerThread - 16);
 #else
-            pc = new ParticleCounter(0);
+            _pc = new ParticleCounter(0);
 #endif
-            
             for (int i = 0; i < NUM_OF_SVELTO_THREADS; i++)
-                _multiParallelTasks.Add(new ParticlesCPUKernel((int) (particlesPerThread * i), (int) particlesPerThread, this, pc));
+                _multiParallelTasks.Add(new ParticlesCPUKernel((int) (particlesPerThread * i), (int) particlesPerThread, this, _pc));
         }
 
-        internal static float _time;
-        volatile bool _breakIt;
-        ParticleCounter pc;
-
-        void OnDisable()
+        void Cleanup()
         {
+            Debug.Log("cleaning");
+            
             if (_particleDataBuffer != null)
             {
                 _particleDataBuffer.Release();
@@ -164,20 +131,90 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 _GPUInstancingArgsBuffer.Release();
                 _GPUInstancingArgsBuffer = null;
             }
-
-            _breakIt = true;
+            
+#if !UNITY_2018_1_OR_NEWER
+            _gpuparticleDataArr.Dispose();
+#endif
+            TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
         }
+
+        void OnDisable()
+        {
+            //the application is shutting down. This is not that necessary in a 
+            //standalone client, but necessary to stop the thread when the 
+            //application is stopped in the Editor to stop all the threads.
+            
+            _multiParallelTasks.ClearAndKill();
+            
+            Cleanup();
+        }
+        
+        void InitializeDataForDrawMeshInstancedIndirect()
+        {
+            _cpuParticleDataArr = new CPUParticleData[_particleCount];
+#if !UNITY_2018_1_OR_NEWER
+            _gpuparticleDataArr = new NativeArray<GPUParticleData>((int) _particleCount, Allocator.Persistent);
+#else
+            _gpuparticleDataArr = new GPUParticleData[_particleCount];
+#endif
+            _particleDataBuffer = new ComputeBuffer((int) _particleCount, Marshal.SizeOf(typeof(GPUParticleData)));
+            // set default position
+            for (int i = 0; i < _particleCount; i++)
+            {
+                _cpuParticleDataArr[i].basePosition = new Vector3(Random.Range(-10.0f, 10.0f),
+                                                                  Random.Range(-10.0f, 10.0f), Random.Range(-10.0f, 10.0f));
+                _cpuParticleDataArr[i].rotationSpeed = Random.Range(1.0f, 100.0f);
+            }
+
+            for (int i = 0; i < _particleCount; i++)
+            {
+                _gpuparticleDataArr[i] =
+                    new GPUParticleData(new Vector3(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f),
+                                                    Random.Range(0.0f, 1.0f)));
+            }
+
+            // creat point mesh
+            _pointMesh          = new Mesh();
+            _pointMesh.vertices = new[] {new Vector3(0, 0)};
+            _pointMesh.normals  = new[] {new Vector3(0, 1, 0)};
+            _pointMesh.SetIndices(new[] {0}, MeshTopology.Points, 0);
+
+            _GPUInstancingArgsBuffer = new ComputeBuffer(1
+                                                       , _GPUInstancingArgs.Length * sizeof(uint)
+                                                       , ComputeBufferType.IndirectArguments);
+            _GPUInstancingArgs[0] = (_pointMesh != null) ? _pointMesh.GetIndexCount(0) : 0;
+            _GPUInstancingArgs[1] = _particleCount;
+            _GPUInstancingArgsBuffer.SetData(_GPUInstancingArgs);
+
+            var materialShader = Shader.Find("Custom/MillionPointsCPU");
+            _material.shader = materialShader;
+            _material.SetBuffer("_ParticleDataBuffer", _particleDataBuffer);
+        }
+        
+        internal static float _time;
+        ParticleCounter       _pc;
     }
 
     public struct CPUParticleData
     {
-        public Vector3 BasePosition;
+        public Vector3 basePosition;
         public float rotationSpeed;
     }
 
     public struct GPUParticleData
     {
-        public Vector3 Position;
-        public Vector3 Albedo;
+        public Vector3 position;
+        public Vector3 albedo;
+
+        public GPUParticleData(Vector3 albedo):this()
+        {
+            this.albedo = albedo;
+        }
+
+        public GPUParticleData(Vector3 position, Vector3 albedo)
+        {
+            this.position = position;
+            this.albedo = albedo;
+        }
     }
 }

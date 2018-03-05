@@ -30,13 +30,13 @@ namespace PerformanceCheker
             //clear
             bufferedString.Length = 0;
             
-            bufferedString.Append("FPS:");
+            bufferedString.Append("ms:");
             bufferedString.Append(profiler.CurrentFPS);
             bufferedString.Append("\r\n");
-            bufferedString.Append("Max FPS:");
+            bufferedString.Append("Max ms:");
             bufferedString.Append(profiler.MaxFPS);
             bufferedString.Append("\r\n");
-            bufferedString.Append("Min FPS:");
+            bufferedString.Append("Min ms:");
             bufferedString.Append(profiler.MinFPS);
 #if BENCHMARK                        
             bufferedString.Append("\r\n");

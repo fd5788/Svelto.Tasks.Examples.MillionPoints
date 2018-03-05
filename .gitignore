@@ -43,3 +43,7 @@ UWP
 /Assets/WSATestCertificate.pfx
 /Assets/WSATestCertificate.pfx.meta
 /UnityPackageManager/manifest.json
+il2cppOutput
+IL2CPPWithSvelto_Data
+IL2CPPWithSvelto
+/Packages/manifest.json

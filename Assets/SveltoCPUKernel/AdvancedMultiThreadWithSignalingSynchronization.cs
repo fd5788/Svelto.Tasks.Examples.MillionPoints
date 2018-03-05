@@ -6,15 +6,15 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 {
     public partial class MillionPointsCPU
     {
-        IEnumerator MainThreadOperations(ParticleCounter particleCounter)
+        IEnumerator MainThreadOperations()
         {
             var bounds = new Bounds(_BoundCenter, _BoundSize);
 
             var syncRunner = new SyncRunner();
 
             //these will help with synchronization between threads
-            WaitForSignalEnumerator _waitForSignal = new WaitForSignalEnumerator(() => _breakIt);
-            WaitForSignalEnumerator _otherwaitForSignal = new WaitForSignalEnumerator();
+            WaitForSignalEnumerator _waitForSignal = new WaitForSignalEnumerator();
+            WaitForSignalEnumerator _otherwaitForSignal = new WaitForSignalEnumerator(() => this.isActiveAndEnabled == true);
 
             //Start the operations on other threads
             OperationsRunningOnOtherThreads(_waitForSignal, _otherwaitForSignal)
@@ -28,18 +28,20 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //wait until the other thread tell us that the data is ready to be used.
                 //Note that I am stalling the main thread here! This is entirely up to you
                 //if you don't want to stall it, as you can see with the other use cases
-                _otherwaitForSignal.RunOnSchedule(syncRunner);
+                //However if you use the syncRunner, be very careful as it could
+                //stall the game for ever!
+                yield return _otherwaitForSignal.RunOnSchedule(syncRunner);
 #if BENCHMARK
                 if (PerformanceCheker.PerformanceProfiler.showingFPSValue > 30.0f)
                 {
                     
-                    if (particleCounter.particlesLimit >= 16)
-                        particleCounter.particlesLimit -= 16;
+                    if (_pc.particlesLimit >= 16)
+                        _pc.particlesLimit -= 16;
 
-                    PerformanceCheker.PerformanceProfiler.particlesCount = particleCounter.particlesTransformed;
+                    PerformanceCheker.PerformanceProfiler.particlesCount = _pc.particlesTransformed;
                 }
                 
-                particleCounter.particlesTransformed = 0;
+                _pc.particlesTransformed = 0;
 #endif    
                 
                 _particleDataBuffer.SetData(_gpuparticleDataArr);
@@ -63,9 +65,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         {
             //a SyncRunner stop the execution of the thread until the task is not completed
             //the parameter true means that the runner will sleep in between yields
-            var syncRunner = new SyncRunner();
-
-            while (_breakIt == false)
+            while (true)
             {
                 //execute the tasks. The MultiParallelTask is a special collection
                 //that uses N threads on its own to execute the tasks. This thread
@@ -73,7 +73,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //is done. That's why the syncrunner can sleep between yields, so 
                 //that this thread won't take much CPU just to wait the parallel 
                 //tasks to finish
-                _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);                
+                yield return _multiParallelTasks;                
                 //the 1 Million particles operation are done, let's signal that the
                 //result can now be used
                 otherWaitForSignal.Signal();
@@ -83,17 +83,8 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //condition, which is needed only because if this application runs
                 //in the editor, the threads spawned will not stop until the Editor is 
                 //shut down.
-                waitForSignal.RunOnSchedule(syncRunner);
+                yield return waitForSignal;
             }
-
-            //the application is shutting down. This is not that necessary in a 
-            //standalone client, but necessary to stop the thread when the 
-            //application is stopped in the Editor to stop all the threads.
-            _multiParallelTasks.ClearAndKill();
-
-            TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
-
-            yield break;
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 
             var syncRunner = new SyncRunner();
 
-            while (_breakIt == false)
+            while (true)
             {
                 _time = Time.time / 10;
                 //Since we are using the SyncRunner, we don't need to yield the execution
@@ -32,13 +32,6 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //continue the cycle on the next frame
                 yield return null;
             }
-
-            //the application is shutting down. This is not that necessary in a 
-            //standalone client, but necessary to stop the thread when the 
-            //application is stopped in the Editor to stop all the threads.
-            _multiParallelTasks.ClearAndKill();
-
-            TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
         }
     }
 }

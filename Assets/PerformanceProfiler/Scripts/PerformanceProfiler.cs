@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace PerformanceCheker
 {
@@ -42,15 +43,18 @@ namespace PerformanceCheker
 
 
         //FPS check
-        readonly float FPSCheckIntervalSecond = 0.3f;
+        float FPSCheckIntervalSecond = 0.3f;
         int frameCount = 0;
         float prevTime=0f;
         float deltaTime=0f;
         public static float showingFPSValue=0f;
         float showingMaxFPSValue=0f;
         float showingMinFPSValue=float.MaxValue;
-        int iterations;
+        float timeElapsed;
+        int iteration;
+#if BENCHMARK        
         public static int particlesCount;
+#endif    
 
         void Awake()
         {
@@ -58,25 +62,34 @@ namespace PerformanceCheker
         }
 
         // Update is called once per frame
-        void Update()
+        IEnumerator Start()
         {
-            ++frameCount;
-            deltaTime = Time.realtimeSinceStartup - prevTime;
-            if (deltaTime >= FPSCheckIntervalSecond)
-            {
-                showingFPSValue = frameCount / deltaTime;
+            prevTime = Time.realtimeSinceStartup;
 
-                if (iterations++ > 6)
+            while (true)
+            {
+                ++frameCount;
+                deltaTime   =  Time.realtimeSinceStartup - prevTime;
+                timeElapsed += Time.deltaTime;
+                if (deltaTime >= FPSCheckIntervalSecond)
                 {
-                    if (showingMinFPSValue > showingFPSValue) showingMinFPSValue = showingFPSValue;
-                    if (showingMaxFPSValue < showingFPSValue) showingMaxFPSValue = showingFPSValue;
+                    showingFPSValue = (timeElapsed * 1000.0f) / frameCount;
+                    frameCount      = 0;
+                    timeElapsed     = 0;
+
+                    if (iteration++ > 7)
+                    {
+                        if (showingMinFPSValue > showingFPSValue) showingMinFPSValue = showingFPSValue;
+                        if (showingMaxFPSValue < showingFPSValue) showingMaxFPSValue = showingFPSValue;
+                    }
+
+                    prevTime = Time.realtimeSinceStartup;
                 }
 
-                frameCount = 0;
-                prevTime = Time.realtimeSinceStartup;
-            }
+                gc_count = System.GC.CollectionCount(0 /* generation */) - gc_start_count_;
 
-            gc_count = System.GC.CollectionCount(0 /* generation */) - gc_start_count_;
+                yield return null;
+            }
         }
     }
 }
