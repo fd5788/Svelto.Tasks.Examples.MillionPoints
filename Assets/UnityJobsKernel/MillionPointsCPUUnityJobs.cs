@@ -96,7 +96,7 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
 
             _time = Time.time / 10;
 
-            var jobSchedule = job.Schedule(_particleCount, 1);
+            var jobSchedule = job.Schedule(_particleCount, 64);
             
             jobSchedule.Complete();
             

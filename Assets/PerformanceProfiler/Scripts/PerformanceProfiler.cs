@@ -79,6 +79,12 @@ namespace PerformanceCheker
 
                     if (iteration++ > 7)
                     {
+                        if (iteration % 50 == 0)
+                        {
+                            showingMinFPSValue = float.MaxValue;
+                            showingMaxFPSValue = 0;
+                        }
+                        
                         if (showingMinFPSValue > showingFPSValue) showingMinFPSValue = showingFPSValue;
                         if (showingMaxFPSValue < showingFPSValue) showingMaxFPSValue = showingFPSValue;
                     }

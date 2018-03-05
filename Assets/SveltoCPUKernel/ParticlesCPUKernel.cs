@@ -12,7 +12,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         int endIndex;
 
         CPUParticleData[] _particleDataArr;
-#if !UNITY_2018_1_OR_NEWER        
+#if UNITY_2018_1_OR_NEWER  && USE_NATIVE_ARRAYS      
         NativeArray<GPUParticleData> _gpuparticleDataArr;
 #else
         GPUParticleData[] _gpuparticleDataArr;
@@ -134,13 +134,18 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 randomVector.x *= magnitude;
                 randomVector.y *= magnitude;
                 randomVector.z *= magnitude;
-
+#if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS
                 Vector3 position;
                 rotate_position(ref _particleDataArr[i].basePosition,
                     ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPU._time,
                     out position);
                 
                 _gpuparticleDataArr[i] = new GPUParticleData(position, _gpuparticleDataArr[i].albedo);
+#else
+                rotate_position(ref _particleDataArr[i].basePosition,
+                                ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPU._time,
+                                out _gpuparticleDataArr[i].position);
+#endif                
             }
 
             var value = i - startIndex;

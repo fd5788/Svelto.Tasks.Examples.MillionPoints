@@ -1,7 +1,5 @@
-﻿
-using System;
-using System.Collections;
-using System.Runtime.CompilerServices;
+﻿//don't use the BENCHMARK define, it's not supported
+
 #if UNITY_2018_1_OR_NEWER
 using Unity.Collections;
 #endif
@@ -36,7 +34,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         Mesh _pointMesh;
 
         public CPUParticleData[] _cpuParticleDataArr;
-#if !UNITY_2018_1_OR_NEWER
+#if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS
         public NativeArray<GPUParticleData> _gpuparticleDataArr;
 #else        
         public GPUParticleData[] _gpuparticleDataArr;
@@ -132,7 +130,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 _GPUInstancingArgsBuffer = null;
             }
             
-#if !UNITY_2018_1_OR_NEWER
+#if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS
             _gpuparticleDataArr.Dispose();
 #endif
             TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
@@ -152,7 +150,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         void InitializeDataForDrawMeshInstancedIndirect()
         {
             _cpuParticleDataArr = new CPUParticleData[_particleCount];
-#if !UNITY_2018_1_OR_NEWER
+#if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS
             _gpuparticleDataArr = new NativeArray<GPUParticleData>((int) _particleCount, Allocator.Persistent);
 #else
             _gpuparticleDataArr = new GPUParticleData[_particleCount];
