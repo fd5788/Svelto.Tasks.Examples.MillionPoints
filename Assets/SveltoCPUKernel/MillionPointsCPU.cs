@@ -41,7 +41,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 #endif    
         MultiThreadedParallelTaskCollection _multiParallelTasks;
 
-        const uint NUM_OF_SVELTO_THREADS = 16;
+        const uint NUM_OF_SVELTO_THREADS = 28;
 
         void Awake()
         {
