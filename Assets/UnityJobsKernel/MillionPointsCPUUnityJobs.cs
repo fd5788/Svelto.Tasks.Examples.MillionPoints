@@ -8,26 +8,19 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
 {
     public class MillionPointsCPUUnityJobs : MonoBehaviour
     {
-        // ==============================
-
         #region Computer_shader_stuff_I_still_have_to_understand_properly
 
         ComputeBuffer _particleDataBuffer;
 
-        /// GPU Instancingの為の引数
         readonly uint[] _GPUInstancingArgs = {0, 0, 0, 0, 0};
 
-        /// GPU Instancingの為の引数バッファ
         ComputeBuffer _GPUInstancingArgsBuffer;
 
-        #endregion // Defines
+        #endregion 
 
-        [SerializeField] int _particleCount = 256000;
-
+        [SerializeField] int _particleCount;
         [SerializeField] Material _material;
-
         [SerializeField] Vector3 _BoundCenter = Vector3.zero;
-
         [SerializeField] Vector3 _BoundSize = new Vector3(300f, 300f, 300f);
 
         Mesh _pointMesh;
@@ -65,17 +58,11 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
                     Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f)));
             }
 
-            // creat point mesh
+            // create point mesh
             _pointMesh = new Mesh();
-            _pointMesh.vertices = new Vector3[]
-            {
-                new Vector3(0, 0),
-            };
-            _pointMesh.normals = new Vector3[]
-            {
-                new Vector3(0, 1, 0),
-            };
-            _pointMesh.SetIndices(new int[] {0}, MeshTopology.Points, 0);
+            _pointMesh.vertices = new[] { new Vector3(0, 0), };
+            _pointMesh.normals = new[] { new Vector3(0, 1, 0), };
+            _pointMesh.SetIndices(new[] {0}, MeshTopology.Points, 0);
 
             _GPUInstancingArgsBuffer = new ComputeBuffer(1,
                 _GPUInstancingArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -88,15 +75,14 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
             _material.SetBuffer("_ParticleDataBuffer", _particleDataBuffer);
             
             _bounds = new Bounds(_BoundCenter, _BoundSize);
+            _job = new ParticlesCPUKernel(this);
         }
 
         void Update()
         {
-            ParticlesCPUKernel job = new ParticlesCPUKernel(this);
+            Time = UnityEngine.Time.time / 10;
 
-            _time = Time.time / 10;
-
-            var jobSchedule = job.Schedule(_particleCount, 64);
+            var jobSchedule = _job.Schedule(_particleCount, 64);
             
             jobSchedule.Complete();
             
@@ -105,9 +91,6 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
             Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
                                                _bounds, _GPUInstancingArgsBuffer);
         }
-
-        internal static float _time;
-        Bounds _bounds;
 
         void OnDisable()
         {
@@ -126,34 +109,38 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
                 _GPUInstancingArgsBuffer = null;
             }
         }
+        
+        internal static float  Time;
+        Bounds _bounds;
+        ParticlesCPUKernel _job;
     }
 
     public struct CPUParticleData
     {
-        public Vector3 BasePosition;
-        public float rotationSpeed;
+        public Vector3 basePosition;
+        public readonly float rotationSpeed;
 
         public CPUParticleData(Vector3 vector3, float range)
         {
-            BasePosition = vector3;
+            basePosition = vector3;
             rotationSpeed = range;
         }
     }
 
     public struct GPUParticleData
     {
-        public Vector3 Position;
-        public Vector3 Albedo;
+        public Vector3 position;
+        public Vector3 albedo;
 
-        public GPUParticleData(Vector3 vector3): this()
+        public GPUParticleData(Vector3 albedo): this()
         {
-            Albedo = vector3;
+            this.albedo = albedo;
         }
 
         public GPUParticleData(Vector3 position, Vector3 albedo)
         {
-            Position = position;
-            Albedo = albedo;
+            this.position = position;
+            this.albedo = albedo;
         }
     }
 }

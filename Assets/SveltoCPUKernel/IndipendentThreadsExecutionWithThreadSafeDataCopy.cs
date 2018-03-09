@@ -2,12 +2,19 @@
 using System.Collections;
 using UnityEngine;
 
+//
+//I was torn between showing this example or not this is different from the other. If enabled this shows how to keep
+//the two thread running without synchronization, while sharing code in thread safe fashion. Should write another
+//article about this. The Mesh will be rendered at the speed of the VSync, but the particles data will be updated
+//only when the parallel operations have finished to execute.
+//
+
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 {
     public partial class MillionPointsCPU
     {
         //yes this is running from another thread
-        IEnumerator MainLoopOnOtherThread()
+        IEnumerator MultiThreadsRunningIndipendently()
         {
             var then = DateTime.Now;
 

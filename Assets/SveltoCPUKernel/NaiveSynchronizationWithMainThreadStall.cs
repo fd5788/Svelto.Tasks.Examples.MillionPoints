@@ -3,13 +3,14 @@ using UnityEngine;
 
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 {
+    //
+    // Naive synchronization, like it happens with the Unity Jobs
+    //
     public partial class MillionPointsCPU
     {
         IEnumerator MainThreadLoopWithNaiveSynchronization()
         {
             var bounds = new Bounds(_BoundCenter, _BoundSize);
-
-            var syncRunner = new SyncRunner();
 
             while (true)
             {
@@ -20,7 +21,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //executed. A MultiParallelTaskCollection relies on its own
                 //internal threads to run, so although the Main thread is stuck
                 //the operation will complete
-                _multiParallelTasks.ThreadSafeRunOnSchedule(syncRunner);
+                _multiParallelTasks.Complete();
                 //then it resumes here, in the main thread, copying the result to the particleDataBuffer.
                 //remember, multiParalleTasks is not executing anymore until the next frame!
                 //so the array is safe to use

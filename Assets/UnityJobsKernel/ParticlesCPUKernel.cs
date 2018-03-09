@@ -115,7 +115,7 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
             
             Vector3 randomVector;
             RandomVector((uint) i + 1, out randomVector);
-            Cross(ref randomVector, ref particle.BasePosition, out randomVector);
+            Cross(ref randomVector, ref particle.basePosition, out randomVector);
 
             var magnitude = 1.0f / randomVector.magnitude;
             randomVector.x *= magnitude;
@@ -123,9 +123,9 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
             randomVector.z *= magnitude;
             
             
-            rotate_position(ref particle.BasePosition,
-                            ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPUUnityJobs._time,
-                            out gpuData.Position);
+            rotate_position(ref particle.basePosition,
+                            ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPUUnityJobs.Time,
+                            out gpuData.position);
 
             _particleDataArr[i] = particle;
             _gpuparticleDataArr[i] = gpuData;

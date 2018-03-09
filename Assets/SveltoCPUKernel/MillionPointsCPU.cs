@@ -1,5 +1,9 @@
 ﻿//don't use the BENCHMARK define, it's not supported
 
+#if !TEST2 && !TEST3
+#define TEST1
+#endif
+
 #if UNITY_2018_1_OR_NEWER
 using Unity.Collections;
 #endif
@@ -70,13 +74,13 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //can cause a lock in this case. ThreadSafeRun always run 
             //the whole code on the selected runner.
 #if TEST1            
-            MainThreadOperations()
+            SignalBasedAdvancedMultithreadYielding()
                 .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
 #elif TEST2            
             MainThreadLoopWithNaiveSynchronization()
                 .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
 #elif TEST3    
-            MainLoopOnOtherThread()
+            MultiThreadsRunningIndipendently()
                 .ThreadSafeRunOnSchedule(StandardSchedulers.multiThreadScheduler);
 #endif            
             //the task that will execute the _multiParallelTask collection also
@@ -100,7 +104,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             uint particlesPerThread = _particleCount / NUM_OF_SVELTO_THREADS;
             //create a collection of task that will run in parallel on several threads.
             //the number of threads and tasks to perform are not dipendennt.
-            _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS, true);
+            _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS);
             //in this case though we just want to perform a task for each thread
             //ParticlesCPUKernel is a task (IEnumerator) that executes the 
             //algebra operation on the particles. Each task perform the operation
@@ -133,7 +137,6 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 #if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS
             _gpuparticleDataArr.Dispose();
 #endif
-            TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
         }
 
         void OnDisable()
@@ -141,8 +144,11 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //the application is shutting down. This is not that necessary in a 
             //standalone client, but necessary to stop the thread when the 
             //application is stopped in the Editor to stop all the threads.
-            
+            //tbh Unity should implement something to shut down the 
+            //threads started by the running application
             _multiParallelTasks.ClearAndKill();
+            
+            TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
             
             Cleanup();
         }
