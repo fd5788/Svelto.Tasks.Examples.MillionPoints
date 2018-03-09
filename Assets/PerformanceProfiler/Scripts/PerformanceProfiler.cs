@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System;
 using UnityEngine;
 
 namespace PerformanceCheker
@@ -45,8 +46,6 @@ namespace PerformanceCheker
         //FPS check
         float FPSCheckIntervalSecond = 0.3f;
         int frameCount = 0;
-        float prevTime=0f;
-        float deltaTime=0f;
         public static float showingFPSValue=0f;
         float showingMaxFPSValue=0f;
         float showingMinFPSValue=float.MaxValue;
@@ -64,14 +63,13 @@ namespace PerformanceCheker
         // Update is called once per frame
         IEnumerator Start()
         {
-            prevTime = Time.realtimeSinceStartup;
-
+            DateTime then = DateTime.Now;
+            
             while (true)
             {
                 ++frameCount;
-                deltaTime   =  Time.realtimeSinceStartup - prevTime;
-                timeElapsed += Time.deltaTime;
-                if (deltaTime >= FPSCheckIntervalSecond)
+                timeElapsed += (float)(DateTime.Now - then).TotalSeconds;
+                if (timeElapsed >= FPSCheckIntervalSecond)
                 {
                     showingFPSValue = (timeElapsed * 1000.0f) / frameCount;
                     frameCount      = 0;
@@ -88,10 +86,10 @@ namespace PerformanceCheker
                         if (showingMinFPSValue > showingFPSValue) showingMinFPSValue = showingFPSValue;
                         if (showingMaxFPSValue < showingFPSValue) showingMaxFPSValue = showingFPSValue;
                     }
-
-                    prevTime = Time.realtimeSinceStartup;
                 }
-
+                
+                then = DateTime.Now;
+                
                 gc_count = System.GC.CollectionCount(0 /* generation */) - gc_start_count_;
 
                 yield return null;

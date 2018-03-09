@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETFX_CORE
+using System;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -132,3 +133,4 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
         }
     }
 }
+#endif
