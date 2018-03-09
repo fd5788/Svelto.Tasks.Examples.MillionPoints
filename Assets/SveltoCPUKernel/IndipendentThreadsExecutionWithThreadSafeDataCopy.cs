@@ -12,7 +12,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             var then = DateTime.Now;
 
             //Let's start the MainThread Loop
-            RenderingOnCoroutineRunner().ThreadSafeRun();
+            RenderingOnCoroutineRunner().ThreadSafeRunOnSchedule(StandardSchedulers.coroutineScheduler);
             
             var CopyBufferOnUpdateRunner = new SimpleEnumerator(this); //let's avoid useless allocations
             
