@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Threading;
+#if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS
 using Unity.Collections;
+#endif    
 using UnityEngine;
 
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
@@ -12,7 +14,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         int endIndex;
 
         CPUParticleData[] _particleDataArr;
-#if UNITY_2018_1_OR_NEWER  && USE_NATIVE_ARRAYS      
+#if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS      
         NativeArray<GPUParticleData> _gpuparticleDataArr;
 #else
         GPUParticleData[] _gpuparticleDataArr;

@@ -1,15 +1,21 @@
-﻿using System.Runtime.InteropServices;
+﻿#if !NETFX_CORE && UNITY_2018_1_OR_NEWER
+using System.Runtime.InteropServices;
 using Unity.Collections;
-#if !NETFX_CORE
 using Unity.Jobs;
+using Random = UnityEngine.Random;
 #endif
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
 {
     public class MillionPointsCPUUnityJobs : MonoBehaviour
     {
+        [SerializeField] int _particleCount;
+        [SerializeField] Material _material;
+        [SerializeField] Vector3 _BoundCenter = Vector3.zero;
+        [SerializeField] Vector3 _BoundSize = new Vector3(300f, 300f, 300f);
+
+#if !NETFX_CORE && UNITY_2018_1_OR_NEWER
 #region Computer_shader_stuff_I_still_have_to_understand_properly
 
         ComputeBuffer _particleDataBuffer;
@@ -20,11 +26,6 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
 
 #endregion
 
-        [SerializeField] int _particleCount;
-        [SerializeField] Material _material;
-        [SerializeField] Vector3 _BoundCenter = Vector3.zero;
-        [SerializeField] Vector3 _BoundSize = new Vector3(300f, 300f, 300f);
-#if !NETFX_CORE
         Mesh _pointMesh;
 
         public NativeArray<CPUParticleData> _cpuParticleDataArr;

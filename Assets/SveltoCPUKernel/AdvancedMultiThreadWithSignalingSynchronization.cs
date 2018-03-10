@@ -15,8 +15,13 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             var bounds = new Bounds(_BoundCenter, _BoundSize);
 
             //these will help with synchronization between threads
-            WaitForSignalEnumerator waitForSignal = new WaitForSignalEnumerator();
-            WaitForSignalEnumerator otherwaitForSignal = new WaitForSignalEnumerator(() => this.isActiveAndEnabled == false, 100);
+            WaitForSignalEnumerator waitForSignal = new WaitForSignalEnumerator("MainThreadWait", 1000);
+            WaitForSignalEnumerator otherwaitForSignal = new WaitForSignalEnumerator
+                ("OtherThreadWait", () => isActiveAndEnabled == false, 1000);
+            
+            _particleDataBuffer.SetData(_gpuparticleDataArr);
+
+            yield return null;
 
             //Start the operations on other threads
             OperationsRunningOnOtherThreads(waitForSignal, otherwaitForSignal)
@@ -26,7 +31,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             while (true)
             {
                 _time = Time.time / 10;
-                
+
                 //Since we want to feed the GPU with the data processed 
                 //from the other thread, we can't set the particleDataBuffer
                 //until this operation is done. For this reason we stall
@@ -66,8 +71,8 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             }
         }
         
-        IEnumerator OperationsRunningOnOtherThreads(WaitForSignalEnumerator waitForSignal,
-            WaitForSignalEnumerator otherWaitForSignal)
+        IEnumerator OperationsRunningOnOtherThreads(WaitForSignalEnumerator mainWaitForSignal,
+                                                    WaitForSignalEnumerator otherWaitForSignal)
         {
             while (true)
             {
@@ -76,7 +81,8 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //complete operation is similar to the Unity Jobs complete 
                 //operations. It stalls the thread where it's called from
                 //until everything is done!
-                _multiParallelTasks.Complete();                
+                _multiParallelTasks.Complete();
+                //yield return _multiParallelTasks;
                 //the 1 Million particles operation are done, let's signal that the
                 //result can now be used
                 otherWaitForSignal.Signal();
@@ -84,7 +90,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //us that now we can perform again the particles operation.
                 //since we are not using the thread for anything else
                 //we can stall the thread here until is done
-                yield return null;
+                yield return mainWaitForSignal;
             }
         }
     }

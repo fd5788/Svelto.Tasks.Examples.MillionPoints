@@ -146,7 +146,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //application is stopped in the Editor to stop all the threads.
             //tbh Unity should implement something to shut down the 
             //threads started by the running application
-            _multiParallelTasks.ClearAndKill();
+            _multiParallelTasks.Dispose();
             
             TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
             

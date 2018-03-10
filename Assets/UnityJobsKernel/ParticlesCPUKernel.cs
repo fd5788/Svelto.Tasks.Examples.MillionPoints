@@ -1,4 +1,4 @@
-﻿#if !NETFX_CORE
+﻿#if !NETFX_CORE && UNITY_2018_1_OR_NEWER
 using System;
 using Unity.Collections;
 using Unity.Jobs;
