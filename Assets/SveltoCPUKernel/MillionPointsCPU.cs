@@ -90,7 +90,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         internal class ParticleCounter
         {
             public int particlesTransformed;
-            public uint particlesLimit;
+            public readonly uint particlesLimit;
 
             public ParticleCounter(uint limit)
             {
@@ -117,11 +117,25 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             for (int i = 0; i < NUM_OF_SVELTO_THREADS; i++)
                 _multiParallelTasks.Add(new ParticlesCPUKernel((int) (particlesPerThread * i), (int) particlesPerThread, this, _pc));
         }
+        
+        void OnDisable()
+        {
+            //the application is shutting down. This is not that necessary in a 
+            //standalone client, but necessary to stop the thread when the 
+            //application is stopped in the Editor to stop all the threads.
+            //tbh Unity should implement something to shut down the 
+            //threads started by the running application
+          //  _multiParallelTasks.Dispose();
+            
+            Debug.Log("clean up");
+            
+            TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
+            
+            Cleanup();
+        }
 
         void Cleanup()
         {
-            Debug.Log("cleaning");
-            
             if (_particleDataBuffer != null)
             {
                 _particleDataBuffer.Release();
@@ -139,20 +153,6 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 #endif
         }
 
-        void OnDisable()
-        {
-            //the application is shutting down. This is not that necessary in a 
-            //standalone client, but necessary to stop the thread when the 
-            //application is stopped in the Editor to stop all the threads.
-            //tbh Unity should implement something to shut down the 
-            //threads started by the running application
-            _multiParallelTasks.Dispose();
-            
-            TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
-            
-            Cleanup();
-        }
-        
         void InitializeDataForDrawMeshInstancedIndirect()
         {
             _cpuParticleDataArr = new CPUParticleData[_particleCount];

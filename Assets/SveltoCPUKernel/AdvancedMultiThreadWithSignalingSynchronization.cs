@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Svelto.Tasks.Enumerators;
 using UnityEngine;
 
@@ -19,10 +20,6 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             WaitForSignalEnumerator otherwaitForSignal = new WaitForSignalEnumerator
                 ("OtherThreadWait", () => isActiveAndEnabled == false, 1000);
             
-            _particleDataBuffer.SetData(_gpuparticleDataArr);
-
-            yield return null;
-
             //Start the operations on other threads
             OperationsRunningOnOtherThreads(waitForSignal, otherwaitForSignal)
                 .ThreadSafeRunOnSchedule(StandardSchedulers.multiThreadScheduler);
@@ -42,7 +39,10 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //yield return otherwaitForSignal;
                 //but I want the mainthread actually to stall so that
                 //the profile can measure the time taken to wait here
-                otherwaitForSignal.WaitForSignal();
+                otherwaitForSignal.Complete();
+                
+                if (_pc.particlesTransformed < 999900)
+                    Utility.Console.LogError("not enough particles transformed");
 #if BENCHMARK
                 if (PerformanceCheker.PerformanceProfiler.showingFPSValue > 30.0f)
                 {
@@ -52,9 +52,8 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 
                     PerformanceCheker.PerformanceProfiler.particlesCount = _pc.particlesTransformed;
                 }
-                
+#endif
                 _pc.particlesTransformed = 0;
-#endif                   
                 _particleDataBuffer.SetData(_gpuparticleDataArr);
 
                 //render the particles. I use DrawMeshInstancedIndirect but
@@ -70,7 +69,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 yield return null;
             }
         }
-        
+
         IEnumerator OperationsRunningOnOtherThreads(WaitForSignalEnumerator mainWaitForSignal,
                                                     WaitForSignalEnumerator otherWaitForSignal)
         {
@@ -81,7 +80,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //complete operation is similar to the Unity Jobs complete 
                 //operations. It stalls the thread where it's called from
                 //until everything is done!
-                _multiParallelTasks.Complete();
+                yield return _multiParallelTasks;
                 //yield return _multiParallelTasks;
                 //the 1 Million particles operation are done, let's signal that the
                 //result can now be used
@@ -93,5 +92,6 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 yield return mainWaitForSignal;
             }
         }
+
     }
 }
