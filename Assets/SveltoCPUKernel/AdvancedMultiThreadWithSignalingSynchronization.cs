@@ -34,11 +34,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //until this operation is done. For this reason we stall
                 //the mainthread until the data is ready. This operation is advanced
                 //as it could stall the game for ever if you don't know
-                //what you are doing! It's faster than the naive way though
-                //mind that I could have simply wrote
-                //yield return otherwaitForSignal;
-                //but I want the mainthread actually to stall so that
-                //the profile can measure the time taken to wait here
+                //what you are doing! 
                 otherwaitForSignal.Complete();
                 
                 if (_pc.particlesTransformed < 999900)
@@ -81,7 +77,6 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //operations. It stalls the thread where it's called from
                 //until everything is done!
                 yield return _multiParallelTasks;
-                //yield return _multiParallelTasks;
                 //the 1 Million particles operation are done, let's signal that the
                 //result can now be used
                 otherWaitForSignal.Signal();
