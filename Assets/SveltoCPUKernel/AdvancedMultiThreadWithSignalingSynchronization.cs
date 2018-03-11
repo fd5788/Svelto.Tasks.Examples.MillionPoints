@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Threading;
 using Svelto.Tasks.Enumerators;
 using UnityEngine;
 
@@ -36,9 +37,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //as it could stall the game for ever if you don't know
                 //what you are doing! 
                 otherwaitForSignal.Complete();
-                
-                if (_pc.particlesTransformed < 999900)
-                    Utility.Console.LogError("not enough particles transformed");
+
 #if BENCHMARK
                 if (PerformanceCheker.PerformanceProfiler.showingFPSValue > 30.0f)
                 {
@@ -51,15 +50,19 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 #endif
                 _pc.particlesTransformed = 0;
                 _particleDataBuffer.SetData(_gpuparticleDataArr);
-
+                
+                //tell to the other thread that now it can perform the operations
+                //for the next frame.
+                waitForSignal.Signal();
+                
+                //do something seriously slow
+#if DO_SOMETHING_SERIOUSLY_SLOW            
+                Thread.Sleep(10);
+#endif    
                 //render the particles. I use DrawMeshInstancedIndirect but
                 //there aren't any compute shaders running. This is so cool!
                 Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
                     bounds, _GPUInstancingArgsBuffer);
-
-                //tell to the other thread that now it can perform the operations
-                //for the next frame.
-                waitForSignal.Signal();
 
                 //continue the cycle on the next frame
                 yield return null;
@@ -87,6 +90,5 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 yield return mainWaitForSignal;
             }
         }
-
     }
 }

@@ -8,10 +8,17 @@ using UnityEngine;
 
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 {
-    class ParticlesCPUKernel : IEnumerator
+    struct ParticlesCPUKernel : 
+#if OLD_STYLE
+IEnumerator
+#else
+    IMultiThreadParallelizable
+#endif
     {
+#if OLD_STYLE
         int startIndex;
         int endIndex;
+#endif
 
         CPUParticleData[] _particleDataArr;
 #if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS      
@@ -112,9 +119,9 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             result.y = position.y + 2.0f * otherResult.y;
             result.z = position.z + 2.0f * otherResult.z;
         }
-
+#if OLD_STYLE
         public ParticlesCPUKernel(int startIndex, int numberOfParticles, MillionPointsCPU t,
-                                  MillionPointsCPU.ParticleCounter pc)
+                                  MillionPointsCPU.ParticleCounter pc):this()
         {
             this.startIndex = startIndex;
             endIndex = startIndex + numberOfParticles;
@@ -122,8 +129,16 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             _gpuparticleDataArr = t._gpuparticleDataArr;
             _pc = pc;
         }
+#else
+        public ParticlesCPUKernel(MillionPointsCPU t):this()
+        {
+            _particleDataArr    = t._cpuParticleDataArr;
+            _gpuparticleDataArr = t._gpuparticleDataArr;
+        }
+#endif
 
-        public bool MoveNext()
+#if OLD_STYLE
+public bool MoveNext()
         {
             int i;
             for (i = startIndex; i < endIndex - _pc.particlesLimit; i++)
@@ -132,10 +147,8 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 RandomVector((uint) i + 1, out randomVector);
                 Cross(ref randomVector, ref _particleDataArr[i].basePosition, out randomVector);
 
-                var magnitude = 1.0f / randomVector.magnitude;
-                randomVector.x *= magnitude;
-                randomVector.y *= magnitude;
-                randomVector.z *= magnitude;
+                randomVector.Normalize();
+                
 #if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS
                 Vector3 position;
                 rotate_position(ref _particleDataArr[i].basePosition,
@@ -160,5 +173,27 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         {}
 
         public object Current { get; private set; }
+#else
+        public void Update(int i)
+        {
+                Vector3 randomVector;
+                RandomVector((uint) i + 1, out randomVector);
+                Cross(ref randomVector, ref _particleDataArr[i].basePosition, out randomVector);
+
+                randomVector.Normalize();
+#if UNITY_2018_1_OR_NEWER && USE_NATIVE_ARRAYS
+                Vector3 position;
+                rotate_position(ref _particleDataArr[i].basePosition,
+                    ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPU._time,
+                    out position);
+                
+                _gpuparticleDataArr[i] = new GPUParticleData(position, _gpuparticleDataArr[i].albedo);
+#else
+                rotate_position(ref _particleDataArr[i].basePosition,
+                                ref randomVector, _particleDataArr[i].rotationSpeed * MillionPointsCPU._time,
+                                out _gpuparticleDataArr[i].position);
+#endif                
+        }
+#endif                
     }
 }

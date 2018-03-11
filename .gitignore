@@ -49,3 +49,5 @@ IL2CPPWithSvelto
 /Packages/manifest.json
 IL2CPPWithJobs
 /EXE/NETNATIVE/SVELTO
+DebugLog
+/Assets/Plugins/DebugLog.meta

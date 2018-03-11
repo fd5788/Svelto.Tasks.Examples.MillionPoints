@@ -52,7 +52,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             if (this.enabled)
                 GetComponent<ComputeShaders.MillionPointsGPU>().enabled = false;
             
-            Application.targetFrameRate = 90;
+            Application.targetFrameRate = -1;
             QualitySettings.vSyncCount = 0;
         }
 
@@ -100,8 +100,6 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 
         void PrepareParallelTasks()
         {
-            //calculate the number of particles per thread
-            uint particlesPerThread = _particleCount / NUM_OF_SVELTO_THREADS;
             //create a collection of task that will run in parallel on several threads.
             //the number of threads and tasks to perform are not dipendennt.
             _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS);
@@ -114,8 +112,15 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 #else
             _pc = new ParticleCounter(0);
 #endif
+#if OLD_STYLE
+            //calculate the number of particles per thread
+            uint particlesPerThread = _particleCount / NUM_OF_SVELTO_THREADS;
             for (int i = 0; i < NUM_OF_SVELTO_THREADS; i++)
                 _multiParallelTasks.Add(new ParticlesCPUKernel((int) (particlesPerThread * i), (int) particlesPerThread, this, _pc));
+#else
+            var particlesCpuKernel = new ParticlesCPUKernel(this);
+            _multiParallelTasks.Add(ref particlesCpuKernel, (int)_particleCount);
+#endif
         }
         
         void OnDisable()

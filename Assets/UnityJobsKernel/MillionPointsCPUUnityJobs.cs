@@ -1,4 +1,6 @@
-﻿#if !NETFX_CORE && UNITY_2018_1_OR_NEWER
+﻿
+using System.Threading;
+#if !NETFX_CORE && UNITY_2018_1_OR_NEWER
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Jobs;
@@ -37,7 +39,7 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
             if (this.enabled)
                 GetComponent<ComputeShaders.MillionPointsGPU>().enabled = false;
             
-            Application.targetFrameRate = 90;
+            Application.targetFrameRate = -1;
             QualitySettings.vSyncCount = 0;
         }
 
@@ -85,11 +87,16 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
         {
             Time = UnityEngine.Time.time / 10;
 
-            var jobSchedule = _job.Schedule(_particleCount, 64);
+            var jobSchedule = _job.Schedule(_particleCount, 32);
             
             jobSchedule.Complete();
             
             _particleDataBuffer.SetData(_gpuparticleDataArr);
+            
+            //do something seriously slow
+#if DO_SOMETHING_SERIOUSLY_SLOW            
+            Thread.Sleep(10);
+#endif    
             
             Graphics.DrawMeshInstancedIndirect(_pointMesh, 0, _material,
                                                _bounds, _GPUInstancingArgsBuffer);

@@ -118,10 +118,7 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
             RandomVector((uint) i + 1, out randomVector);
             Cross(ref randomVector, ref particle.basePosition, out randomVector);
 
-            var magnitude = 1.0f / randomVector.magnitude;
-            randomVector.x *= magnitude;
-            randomVector.y *= magnitude;
-            randomVector.z *= magnitude;
+            randomVector.Normalize();
             
             
             rotate_position(ref particle.basePosition,
