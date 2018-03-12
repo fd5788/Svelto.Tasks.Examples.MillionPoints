@@ -1,6 +1,10 @@
 # Svelto.Tasks.MillionPoints
 
-Another show off of svelto.tasks multithreading capabilities. Melt down your CPU cores transforming 1 million particles on the CPU. 
+Another show off of svelto.tasks multithreading capabilities. Melt down your CPU cores transforming 1 million particles on the CPU.This demo has been very useful to profile and tune Svelto.Tasks. Forked from the original Compute Shader version https://github.com/TaroTokui/MillionPoints. 
+
+**ComputeShadersKernel**: original version
+**SveltoCPUKernel**: Svelto CPU version
+**UnityJobsKernel**: Unity jobs system version
 
 Relative article here: http://www.sebaslab.com/learning-svelto-tasks-example-million-points-example/
 
