@@ -1,5 +1,4 @@
-﻿
-using System.Threading;
+﻿using System.Threading;
 #if !NETFX_CORE && UNITY_2018_1_OR_NEWER
 using System.Runtime.InteropServices;
 using Unity.Collections;
