@@ -6,7 +6,7 @@ Another show off of svelto.tasks multithreading capabilities. Melt down your CPU
 * **SveltoCPUKernel**: Svelto CPU version
 * **UnityJobsKernel**: Unity jobs system version
 
-Relative article here: http://www.sebaslab.com/learning-svelto-tasks-example-million-points-example/
+Related article here: http://www.sebaslab.com/learning-svelto-tasks-example-million-points-example/
 
 ![alt text](http://www.sebaslab.com/wp-content/uploads/2018/01/Screen.jpg) 
 
