@@ -134,7 +134,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             
             Debug.Log("clean up");
             
-            TaskRunner.Instance.StopAndCleanupAllDefaultSchedulerTasks();
+            TaskRunner.StopAndCleanupAllDefaultSchedulers();
             
             Cleanup();
         }
