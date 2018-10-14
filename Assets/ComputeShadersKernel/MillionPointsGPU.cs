@@ -9,9 +9,15 @@ namespace Svelto.Tasks.Example.MillionPoints.ComputeShaders
     {
         // ==============================
 
-        #region Computer_shader_stuff_I_still_have_to_understand_properly
-
+        [TextArea] public string Notes =
+            "This is the original GPU code downloaded from github. It uses pure compute shaders to " +
+            "transform the particles. Obviously the GPU is the best tool for this job, so the other" +
+            "cases are only for demonstration purposes";
         [SerializeField] ComputeShader _ComputeShader;
+        [SerializeField] int _particleCount = 1000000;
+        [SerializeField] Material _material;
+        [SerializeField] Vector3  _BoundCenter = Vector3.zero;
+        [SerializeField] Vector3  _BoundSize   = new Vector3(300f, 300f, 300f);
 
         ComputeBuffer _particleDataBuffer;
 
@@ -19,19 +25,11 @@ namespace Svelto.Tasks.Example.MillionPoints.ComputeShaders
 
         ComputeBuffer _GPUInstancingArgsBuffer;
 
-        #endregion // Defines
-
-        [SerializeField] int _particleCount = 1000000;
-
-        [SerializeField] Material _material;
-
-        [SerializeField] Vector3 _BoundCenter = Vector3.zero;
-
-        [SerializeField] Vector3 _BoundSize = new Vector3(300f, 300f, 300f);
+        
 
         Mesh _pointMesh;
-
         GPUParticleData[] _gpuparticleDataArr;
+        
         const int ThreadBlockSize = 256;
 
         void Awake()
@@ -88,7 +86,7 @@ namespace Svelto.Tasks.Example.MillionPoints.ComputeShaders
 
         void StartComputerShaderWork()
         {
-            ComputerShaderRun().ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
+            ComputerShaderRun().RunOnScheduler(StandardSchedulers.updateScheduler);
         }
 
         IEnumerator ComputerShaderRun()

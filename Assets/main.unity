@@ -116,9 +116,9 @@ NavMeshSettings:
 --- !u!1 &239285777
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 239285780}
   - component: {fileID: 239285779}
@@ -133,7 +133,7 @@ GameObject:
 --- !u!114 &239285778
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 239285777}
   m_Enabled: 1
@@ -151,7 +151,7 @@ MonoBehaviour:
 --- !u!114 &239285779
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 239285777}
   m_Enabled: 1
@@ -165,7 +165,7 @@ MonoBehaviour:
 --- !u!4 &239285780
 Transform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 239285777}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -178,9 +178,9 @@ Transform:
 --- !u!1 &394007077
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 394007078}
   - component: {fileID: 394007080}
@@ -195,7 +195,7 @@ GameObject:
 --- !u!224 &394007078
 RectTransform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 394007077}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -213,7 +213,7 @@ RectTransform:
 --- !u!114 &394007079
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 394007077}
   m_Enabled: 1
@@ -246,9 +246,10 @@ MonoBehaviour:
 --- !u!222 &394007080
 CanvasRenderer:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 394007077}
+  m_CullTransparentMesh: 0
 --- !u!1001 &539767706
 Prefab:
   m_ObjectHideFlags: 0
@@ -294,14 +295,14 @@ Prefab:
       value: 
       objectReference: {fileID: 394007079}
     m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: cdfc3d5c9cc3e5749a08ba48b758e146, type: 2}
-  m_IsPrefabParent: 0
+  m_SourcePrefab: {fileID: 100100000, guid: cdfc3d5c9cc3e5749a08ba48b758e146, type: 2}
+  m_IsPrefabAsset: 0
 --- !u!1 &756189545
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 756189549}
   - component: {fileID: 756189548}
@@ -318,27 +319,31 @@ GameObject:
 --- !u!81 &756189546
 AudioListener:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 756189545}
   m_Enabled: 1
 --- !u!124 &756189547
 Behaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 756189545}
   m_Enabled: 1
 --- !u!20 &756189548
 Camera:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 756189545}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
   m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
+  m_projectionMatrixMode: 1
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -368,7 +373,7 @@ Camera:
 --- !u!4 &756189549
 Transform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 756189545}
   m_LocalRotation: {x: 0.03489949, y: 0, z: 0, w: 0.99939084}
@@ -381,7 +386,7 @@ Transform:
 --- !u!114 &756189550
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 756189545}
   m_Enabled: 1
@@ -396,9 +401,9 @@ MonoBehaviour:
 --- !u!1 &940129846
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 940129850}
   - component: {fileID: 940129849}
@@ -414,7 +419,7 @@ GameObject:
 --- !u!114 &940129847
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 940129846}
   m_Enabled: 1
@@ -430,7 +435,7 @@ MonoBehaviour:
 --- !u!114 &940129848
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 940129846}
   m_Enabled: 1
@@ -451,7 +456,7 @@ MonoBehaviour:
 --- !u!223 &940129849
 Canvas:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 940129846}
   m_Enabled: 1
@@ -471,7 +476,7 @@ Canvas:
 --- !u!224 &940129850
 RectTransform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 940129846}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -490,9 +495,9 @@ RectTransform:
 --- !u!1 &1155629388
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 1155629392}
   - component: {fileID: 1155629391}
@@ -508,7 +513,7 @@ GameObject:
 --- !u!23 &1155629389
 MeshRenderer:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1155629388}
   m_Enabled: 1
@@ -543,7 +548,7 @@ MeshRenderer:
 --- !u!64 &1155629390
 MeshCollider:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1155629388}
   m_Material: {fileID: 0}
@@ -557,14 +562,14 @@ MeshCollider:
 --- !u!33 &1155629391
 MeshFilter:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1155629388}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1155629392
 Transform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1155629388}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -577,9 +582,9 @@ Transform:
 --- !u!1 &1649145696
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 1649145698}
   - component: {fileID: 1649145697}
@@ -593,7 +598,7 @@ GameObject:
 --- !u!108 &1649145697
 Light:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1649145696}
   m_Enabled: 1
@@ -620,6 +625,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
@@ -629,7 +635,7 @@ Light:
 --- !u!4 &1649145698
 Transform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1649145696}
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
@@ -642,9 +648,9 @@ Transform:
 --- !u!1 &1741070207
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 1741070209}
   - component: {fileID: 1741070208}
@@ -660,7 +666,7 @@ GameObject:
 --- !u!114 &1741070208
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1741070207}
   m_Enabled: 1
@@ -668,6 +674,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f1660b560c592546b910c939df7cb99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Notes: 'This is the Svelto.Tasks version of massive multithreaded transformation
+    of particles on the CPU. Itry to find the best strategies to push the core utilization
+    to 100%. Use Defines: Test1 for advancedsynchronization strategy. Test2 for naive
+    synchronization strategy. Test3 to show how the main threadand the other thread
+    can run independently.'
   _particleCount: 1000000
   _material: {fileID: 2100000, guid: 6c4b06b85eebc4e4da80676c59928354, type: 2}
   _BoundCenter: {x: 0, y: 0, z: 0}
@@ -675,7 +686,7 @@ MonoBehaviour:
 --- !u!4 &1741070209
 Transform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1741070207}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -688,7 +699,7 @@ Transform:
 --- !u!114 &1741070210
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1741070207}
   m_Enabled: 0
@@ -696,6 +707,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f31d234918064a7b8bcb59eb5a5013a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Notes: This is the original GPU code downloaded from github. It uses pure compute
+    shaders to transform the particles. Obviously the GPU is the best tool for this
+    job, so the othercases are only for demonstration purposes
   _ComputeShader: {fileID: 7200000, guid: d476d2903d79d3a429df490d3f805933, type: 3}
   _particleCount: 1000000
   _material: {fileID: 2100000, guid: 6c4b06b85eebc4e4da80676c59928354, type: 2}
@@ -704,7 +718,7 @@ MonoBehaviour:
 --- !u!114 &1741070211
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1741070207}
   m_Enabled: 0
@@ -712,6 +726,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a689c6b6f7a78488bef6626a1fa67a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Notes: This is the Unity Jobs version that I maintain for comparison
   _particleCount: 1000000
   _material: {fileID: 2100000, guid: 6c4b06b85eebc4e4da80676c59928354, type: 2}
   _BoundCenter: {x: 0, y: 0, z: 0}

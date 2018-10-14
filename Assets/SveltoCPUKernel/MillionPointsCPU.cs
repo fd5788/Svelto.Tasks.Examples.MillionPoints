@@ -17,9 +17,16 @@ using Random = UnityEngine.Random;
 
 namespace Svelto.Tasks.Example.MillionPoints.Multithreading
 {
+    [HelpURL("http://www.sebaslab.com/svelto-tasks-million-points-multiple-cpu-cores-threads-unity-jobs-system/")]
     public partial class MillionPointsCPU : MonoBehaviour
     {
         // ==============================
+        
+        [TextArea] public string Notes =
+            "This is the Svelto.Tasks version of massive multithreaded transformation of particles on the CPU. I" +
+            "try to find the best strategies to push the core utilization to 100%. Use Defines: Test1 for advanced" +
+            "synchronization strategy. Test2 for naive synchronization strategy. Test3 to show how the main thread" +
+            "and the other thread can run independently.";
 
 #region Computer_shader_stuff_I_still_have_to_understand_properly
 
@@ -75,13 +82,13 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             //the whole code on the selected runner.
 #if TEST1            
             SignalBasedAdvancedMultithreadYielding()
-                .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
+                .RunOnScheduler(StandardSchedulers.updateScheduler);
 #elif TEST2            
             MainThreadLoopWithNaiveSynchronization()
-                .ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
+                .RunOnScheduler(StandardSchedulers.updateScheduler);
 #elif TEST3    
             MultiThreadsRunningIndipendently()
-                .ThreadSafeRunOnSchedule(StandardSchedulers.multiThreadScheduler);
+                .RunOnScheduler(StandardSchedulers.multiThreadScheduler);
 #endif            
             //the task that will execute the _multiParallelTask collection also
             //run on another thread.

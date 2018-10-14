@@ -19,7 +19,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             var then = DateTime.Now;
 
             //Let's start the MainThread Loop
-            RenderingOnCoroutineRunner().ThreadSafeRunOnSchedule(StandardSchedulers.coroutineScheduler);
+            RenderingOnCoroutineRunner().RunOnScheduler(StandardSchedulers.coroutineScheduler);
             
             var CopyBufferOnUpdateRunner = new SimpleEnumerator(this); //let's avoid useless allocations
             
@@ -35,7 +35,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //cannot be passed to the compute buffer now,
                 //as the Unity methods are not thread safe
                 //so I have to run a simple enumerator on the main thread
-                var continuator = CopyBufferOnUpdateRunner.ThreadSafeRunOnSchedule(StandardSchedulers.updateScheduler);
+                var continuator = CopyBufferOnUpdateRunner.RunOnScheduler(StandardSchedulers.updateScheduler);
                 //and I will wait it to complete, still exploting the continuation wrapper.
                 //We need to wait the MainThread to finish its operation before to run the 
                 //next iteration. 

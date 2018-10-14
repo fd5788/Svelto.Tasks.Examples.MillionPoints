@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Threading;
+﻿using System.Collections;
 using Svelto.Tasks.Enumerators;
 using UnityEngine;
 
@@ -17,13 +15,13 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
             var bounds = new Bounds(_BoundCenter, _BoundSize);
 
             //these will help with synchronization between threads
-            WaitForSignalEnumerator waitForSignal = new WaitForSignalEnumerator("MainThreadWait", 1000);
+            WaitForSignalEnumerator mainWaitForSignal = new WaitForSignalEnumerator("MainThreadWait", 1000);
             WaitForSignalEnumerator otherwaitForSignal = new WaitForSignalEnumerator
                 ("OtherThreadWait", () => isActiveAndEnabled == false, 1000);
             
             //Start the operations on other threads
-            OperationsRunningOnOtherThreads(waitForSignal, otherwaitForSignal)
-                .ThreadSafeRunOnSchedule(StandardSchedulers.multiThreadScheduler);
+            OperationsRunningOnOtherThreads(mainWaitForSignal, otherwaitForSignal)
+                .RunOnScheduler(StandardSchedulers.multiThreadScheduler);
 
             //start the main thread loop
             while (true)
@@ -37,7 +35,6 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 //as it could stall the game for ever if you don't know
                 //what you are doing! 
                 otherwaitForSignal.Complete();
-
 #if BENCHMARK
                 if (PerformanceCheker.PerformanceProfiler.showingFPSValue > 30.0f)
                 {
@@ -53,7 +50,7 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
                 
                 //tell to the other thread that now it can perform the operations
                 //for the next frame.
-                waitForSignal.Signal();
+                mainWaitForSignal.Signal();
                 
                 //do something seriously slow
 #if DO_SOMETHING_SERIOUSLY_SLOW            

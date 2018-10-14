@@ -11,6 +11,9 @@ namespace Svelto.Tasks.Example.MillionPoints.UnityJobs
 {
     public class MillionPointsCPUUnityJobs : MonoBehaviour
     {
+        [TextArea] public string Notes =
+            "This is the Unity Jobs version that I maintain for comparison";
+        
         [SerializeField] int _particleCount;
         [SerializeField] Material _material;
         [SerializeField] Vector3 _BoundCenter = Vector3.zero;
