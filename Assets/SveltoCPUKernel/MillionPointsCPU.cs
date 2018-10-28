@@ -108,8 +108,8 @@ namespace Svelto.Tasks.Example.MillionPoints.Multithreading
         void PrepareParallelTasks()
         {
             //create a collection of task that will run in parallel on several threads.
-            //the number of threads and tasks to perform are not dipendennt.
-            _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS);
+            //the number of threads and tasks to perform are not dependent.
+            _multiParallelTasks = new MultiThreadedParallelTaskCollection(NUM_OF_SVELTO_THREADS, true);
             //in this case though we just want to perform a task for each thread
             //ParticlesCPUKernel is a task (IEnumerator) that executes the 
             //algebra operation on the particles. Each task perform the operation
